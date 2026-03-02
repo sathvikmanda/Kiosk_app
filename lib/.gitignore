@@ -1,0 +1,12 @@
+# Secrets
+env
+.env
+
+# Node
+node_modules/
+
+# Dart / Flutter
+.dart_tool/
+.packages
+build/
+.DS_Store

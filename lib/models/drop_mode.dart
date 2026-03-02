@@ -1,0 +1,4 @@
+enum DropMode {
+  personal,
+  delivery,
+}
