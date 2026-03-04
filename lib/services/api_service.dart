@@ -39,6 +39,18 @@ static Future<String?> startComplaintIfNeeded() async {
   return null;
 }
 
+static Future<void> stopComplaint(String helpId) async {
+  try {
+    await http.post(
+      Uri.parse('$baseUrl/api/complaint/resolve'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'helpId': helpId}),
+    );
+  } catch (e) {
+    print('stopComplaint error: $e');
+  }
+}
+
 
 
 static Future<void> resolveComplaintIfAny() async {

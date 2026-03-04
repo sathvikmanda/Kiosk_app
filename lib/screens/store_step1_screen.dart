@@ -174,7 +174,10 @@ void _showError(String msg) {
           ],
         ),
         OutlinedButton.icon(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            ApiService.stopComplaint(widget.helpId); // 🔴 stop recording
+            Navigator.pop(context);
+          },
           icon: const Icon(Icons.arrow_back),
           label: const Text('CANCEL'),
         ),

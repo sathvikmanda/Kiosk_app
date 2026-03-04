@@ -192,13 +192,16 @@ void initState() {
 
   // ================= UI PARTS =================
 
-  Widget _header(BuildContext context) {
+ Widget _header(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text('DROP PARCEL.', style: AppText.titleXL),
         OutlinedButton.icon(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            ApiService.stopComplaint(widget.helpId); // 🔴 stop recording
+            Navigator.pop(context);
+          },
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           label: const Text('BACK'),
         ),
