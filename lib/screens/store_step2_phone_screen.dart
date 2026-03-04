@@ -3,6 +3,7 @@ import '../core/app_colors.dart';
 import '../core/app_text.dart';
 import '../services/api_service.dart';
 import 'store_step3_otp_screen.dart';
+import '../services/audio_service.dart';
 
 class StoreStep2PhoneScreen extends StatefulWidget {
   const StoreStep2PhoneScreen({
@@ -29,6 +30,15 @@ final String sessionId;
 class _StoreStep2PhoneScreenState extends State<StoreStep2PhoneScreen> {
   static const int phoneLength = 10;
   final List<String> _phoneDigits = [];
+  @override
+void initState() {
+  super.initState();
+
+  // Delay slightly so audio doesn't clash with navigation
+  Future.delayed(const Duration(milliseconds: 300), () {
+    AudioService.play(AudioEvent.enterPhone);
+  });
+}
 
   bool isLoading = false;
 

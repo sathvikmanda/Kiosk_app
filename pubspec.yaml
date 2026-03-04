@@ -11,6 +11,7 @@ dependencies:
   intl: ^0.19.0
   uuid: ^4.4.0
   http: ^1.2.0
+  audioplayers: ^5.2.1
   webview_flutter: ^4.7.0
   razorpay_flutter: ^1.3.7
   mobile_scanner: ^5.0.2
@@ -30,6 +31,13 @@ flutter:
     - assets/images/personal_drop.png
     - assets/images/delivery_drop.png
     - assets/images/otp_whatsapp_example.png
+    - assets/audio/locker_open.mp3
+    - assets/audio/locker_close.mp3
+    - assets/audio/next_step.mp3
+    - assets/audio/error.mp3
+    - assets/audio/success.mp3
+    - assets/audio/enter_phone.mp3
+    - assets/audio/close_door.mp3
 
   fonts:
     - family: Sora

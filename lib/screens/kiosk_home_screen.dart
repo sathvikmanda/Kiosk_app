@@ -37,9 +37,11 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
   late final AnimationController _pulseController;
   late final Animation<double> _pulse;
 
-  bool _loading = false;
+bool _loading = false;
   bool _scanInProgress = false;
-  String? _errorText;
+bool _recordingStartInProgress = false; // ← ADD THIS
+String? _errorText;
+
 
   final LockerStateService _lockerState = LockerStateService();
 
@@ -88,15 +90,16 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
     super.dispose();
   }
 
-  void _softReset() {
-    setState(() {
-      _code.clear();
-      _errorText = null;
-      _loading = false;
-      _scanInProgress = false;
-      _showInactivityWarning = false;
-    });
-  }
+void _softReset() {
+  setState(() {
+    _code.clear();
+    _errorText = null;
+    _loading = false;
+    _scanInProgress = false;
+    _recordingStartInProgress = false; // ← ADD THIS
+    _showInactivityWarning = false;
+  });
+}
 
   // ================= QR SCAN =================
 
@@ -347,7 +350,7 @@ Widget _leftPanel(BuildContext context) {
                 // SEND
                 Expanded(
                   child: _actionButton(
-                    icon: Icons.send_outlined,
+                    icon: Icons.local_shipping_rounded,
                     title: 'Send',
                     subtitle: 'Courier pickup from locker',
                     onTap: () {
@@ -368,25 +371,30 @@ Widget _leftPanel(BuildContext context) {
                 // DROP
                 Expanded(
                   child: _actionButton(
-                    icon: Icons.inventory_2_outlined,
+                    icon: Icons.move_to_inbox_outlined,
                     title: 'Drop',
                     subtitle: 'Leave item for someone else',
                     onTap: () async {
-                      ApiService.trackLockerClick(service: 'drop');
-                      final helpId =
-                          await ApiService.startComplaintIfNeeded();
-                      if (helpId == null) return;
-
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => DropStep1PhoneScreen(
-                            dropMode: DropMode.personal,
-                            helpId: helpId,
-                          ),
-                        ),
-                      );
-                    },
+  if (_recordingStartInProgress) return;
+  _recordingStartInProgress = true;
+  try {
+    ApiService.trackLockerClick(service: 'drop');
+    final helpId = await ApiService.startComplaintIfNeeded();
+    if (helpId == null) return;
+    if (!mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => DropStep1PhoneScreen(
+          dropMode: DropMode.personal,
+          helpId: helpId,
+        ),
+      ),
+    );
+  } finally {
+    if (mounted) setState(() => _recordingStartInProgress = false);
+  }
+},
                   ),
                 ),
 
@@ -399,19 +407,23 @@ Widget _leftPanel(BuildContext context) {
                     title: 'Store',
                     subtitle: 'Keep items temporarily',
                     onTap: () async {
-                      ApiService.trackLockerClick(service: 'store');
-                      final helpId =
-                          await ApiService.startComplaintIfNeeded();
-                      if (helpId == null) return;
-
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              StoreStep1Screen(helpId: helpId),
-                        ),
-                      );
-                    },
+  if (_recordingStartInProgress) return;
+  _recordingStartInProgress = true;
+  try {
+    ApiService.trackLockerClick(service: 'store');
+    final helpId = await ApiService.startComplaintIfNeeded();
+    if (helpId == null) return;
+    if (!mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => StoreStep1Screen(helpId: helpId),
+      ),
+    );
+  } finally {
+    if (mounted) setState(() => _recordingStartInProgress = false);
+  }
+},
                   ),
                 ),
               ],
@@ -587,47 +599,74 @@ Widget _rightPanel(BuildContext context) {
 
   // ================= COMPONENTS =================
 
-  Widget _actionButton({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return ScaleTransition(
-      scale: _pulse,
-      child: Material(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(22),
-        elevation: 8,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(22),
-          onTap: onTap,
-          child: SizedBox.expand(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 28),
-              child: Row(
+Widget _actionButton({
+  required IconData icon,
+  required String title,
+  required String subtitle,
+  required VoidCallback onTap,
+}) {
+  return Material(
+    color: AppColors.panel,
+    borderRadius: BorderRadius.circular(24),
+    child: InkWell(
+      borderRadius: BorderRadius.circular(24),
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+        child: Row(
+          children: [
+
+            // 🔥 ICON BOX
+            ScaleTransition(
+  scale: _pulse,
+  child: Container(
+              width: 90,
+              height: 90,
+              decoration: BoxDecoration(
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: AppColors.primary,
+                  width: 2,
+                ),
+              ),
+              child: Icon(
+                icon,
+                size: 48, // 🔥 Bigger icon
+                color: AppColors.primary,
+              ),
+            ),
+        ),
+
+            const SizedBox(width: 28),
+
+            // TEXT
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(icon, size: 40, color: AppColors.primary),
-                  const SizedBox(width: 26),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title,
-                          style: AppText.titleL
-                              .copyWith(color: AppColors.primary)),
-                      const SizedBox(height: 6),
-                      Text(subtitle, style: AppText.muted),
-                    ],
+                  Text(
+                    title,
+                    style: AppText.titleL.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    subtitle,
+                    style: AppText.muted,
                   ),
                 ],
               ),
             ),
-          ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _codeBox(String value) {
     final filled = value.isNotEmpty;

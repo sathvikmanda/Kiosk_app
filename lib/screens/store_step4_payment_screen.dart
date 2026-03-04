@@ -128,9 +128,9 @@ class _StoreStep4PaymentScreenState
         // ✅ Optional: kiosk-friendly
         'method': {
           'upi': true,
-          'card': false,
-          'netbanking': false,
-          'wallet': false,
+          'card': true,
+          'netbanking': true,
+          'wallet': true,
         },
       });
     } catch (_) {
@@ -145,9 +145,7 @@ class _StoreStep4PaymentScreenState
   Future<void> _onPaymentSuccess(
       PaymentSuccessResponse res) async {
     // 🔥 Restore system UI
-    SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.edgeToEdge,
-    );
+   
 
     if (res.orderId == null ||
         res.signature == null ||

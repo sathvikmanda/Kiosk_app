@@ -6,9 +6,9 @@ import 'complaint_session.dart';
 
 
 class ApiService {
-  static const String baseUrl = "http://192.168.1.102:4000";
+  static const String baseUrl = "http://192.168.0.104:4000";
   //static const String baseUrl = "http://127.0.0.1:3000";
-  static const String lockerId = "L03";
+  static const String lockerId = "L00002";
 
   
   static void hitComplaintApi({required String action}) {
@@ -87,7 +87,7 @@ static Future<Map<String, dynamic>> unlock(String accessCode) async {
 
 
   static Future<Map<String, bool>> getAvailableSizes(String lockerId) async {
-  final uri = Uri.parse('$baseUrl/locker/L03/available-sizes');
+  final uri = Uri.parse('$baseUrl/locker/L00002/available-sizes');
   final res = await http.get(uri);
 
   // 🔥 LOG EVERYTHING

@@ -5,6 +5,7 @@ import '../core/app_text.dart';
 import '../models/drop_mode.dart';
 import '../services/api_service.dart';
 import 'drop_step2_otp_screen.dart';
+import '../services/audio_service.dart';
 
 class DropStep1PhoneScreen extends StatefulWidget {
   const DropStep1PhoneScreen({
@@ -22,8 +23,19 @@ class DropStep1PhoneScreen extends StatefulWidget {
 }
 
 class _DropStep1PhoneScreenState extends State<DropStep1PhoneScreen> {
+  
   static const int phoneLength = 10;
   final List<String> _phone = [];
+
+  @override
+void initState() {
+  super.initState();
+
+  // Delay slightly so audio doesn't clash with navigation
+  Future.delayed(const Duration(milliseconds: 300), () {
+    AudioService.play(AudioEvent.enterPhone);
+  });
+}
 
   void _onKey(String v) {
     setState(() {
