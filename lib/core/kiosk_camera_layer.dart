@@ -28,7 +28,7 @@ class _KioskCameraLayerState extends State<KioskCameraLayer>
 
     _controller = MobileScannerController(
       facing: CameraFacing.front,
-      detectionSpeed: DetectionSpeed.unrestricted,
+      detectionSpeed: DetectionSpeed.noDuplicates,
       torchEnabled: false,
     );
   }

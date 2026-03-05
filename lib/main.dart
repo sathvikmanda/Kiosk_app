@@ -1,30 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import 'core/app_theme.dart';
 import 'core/route_observer.dart';
-import 'core/inactivity_controller.dart';
-
+import 'core/inactivity_wrapper.dart';
 import 'screens/kiosk_home_screen.dart';
 import 'utils/immersive_mode.dart';
-
+import 'core/inactivity_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await SystemChrome.setEnabledSystemUIMode(
-    SystemUiMode.immersiveSticky,
-  );
-
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
-
   ImmersiveMode.enable();
-
   runApp(const DropPointApp());
 }
+
+// Global navigator key
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class DropPointApp extends StatelessWidget {
   const DropPointApp({super.key});
@@ -33,15 +28,16 @@ class DropPointApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Listener(
       behavior: HitTestBehavior.translucent,
-      onPointerDown: (_) {
-        InactivityController().userInteracted();
-      },
+      onPointerDown: (_) => InactivityController().userInteracted(),
       child: MaterialApp(
-        navigatorObservers: [routeObserver],
+        navigatorKey: navigatorKey,
+        navigatorObservers: [routeObserver, inactivityRouteObserver],
         debugShowCheckedModeBanner: false,
         title: 'Drop Point Kiosk',
         theme: AppTheme.theme,
-        home: const KioskHomeScreen(),
+        home: InactivityWrapper(
+          child: const KioskHomeScreen(),
+        ),
       ),
     );
   }

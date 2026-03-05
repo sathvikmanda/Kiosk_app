@@ -6,7 +6,7 @@ import 'complaint_session.dart';
 
 
 class ApiService {
-  static const String baseUrl = "http://192.168.0.102:4000";
+  static const String baseUrl = "http://192.168.0.101:4000";
   //static const String baseUrl = "http://127.0.0.1:3000";
   static const String lockerId = "L00002";
 
@@ -26,18 +26,18 @@ class ApiService {
     }
   }
 
-static Future<String?> startComplaintIfNeeded() async {
-  final uri = Uri.parse('$baseUrl/api/complaint');
+  static Future<String?> startComplaintIfNeeded() async {
+    final uri = Uri.parse('$baseUrl/api/complaint');
 
-  final res = await http.post(uri);
+    final res = await http.post(uri);
 
-  if (res.statusCode == 200) {
-    final data = jsonDecode(res.body);
-    return data['helpId'];
+    if (res.statusCode == 200) {
+      final data = jsonDecode(res.body);
+      return data['helpId'];
+    }
+
+    return null;
   }
-
-  return null;
-}
 
 static Future<void> stopComplaint(String helpId) async {
   try {

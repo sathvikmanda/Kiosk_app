@@ -258,10 +258,6 @@ throw Exception(response['message'] ?? 'Unknown error');
   @override
   Widget build(BuildContext context) {
     return HiddenAdminUnlock(
-  child: GestureDetector(
-    behavior: HitTestBehavior.opaque,
-    onTap: InactivityController().userInteracted,
-    onPanDown: (_) => InactivityController().userInteracted(),
     child: Scaffold(
         backgroundColor: AppColors.background,
         body: Stack(
@@ -315,7 +311,7 @@ throw Exception(response['message'] ?? 'Unknown error');
               ),
           ],
         ),
-      ),
+      
     ),
     );
   }
@@ -381,6 +377,7 @@ Widget _leftPanel(BuildContext context) {
     ApiService.trackLockerClick(service: 'drop');
     final helpId = await ApiService.startComplaintIfNeeded();
     if (helpId == null) return;
+    InactivityController().activeHelpId = helpId;
     if (!mounted) return;
     Navigator.push(
       context,
@@ -413,6 +410,7 @@ Widget _leftPanel(BuildContext context) {
     ApiService.trackLockerClick(service: 'store');
     final helpId = await ApiService.startComplaintIfNeeded();
     if (helpId == null) return;
+    InactivityController().activeHelpId = helpId;
     if (!mounted) return;
     Navigator.push(
       context,
