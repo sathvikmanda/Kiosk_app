@@ -18,7 +18,7 @@ class StoreStep4PaymentScreen extends StatefulWidget {
     required this.size,
     required this.hours,
     required this.ratePerHour,
-required this.sessionId,
+
 
     required this.helpId,
   });
@@ -27,7 +27,7 @@ required this.sessionId,
   final String size;
   final int hours;
   final int ratePerHour;
-final String sessionId;
+
 
 final String helpId;
 
@@ -95,7 +95,7 @@ class _StoreStep4PaymentScreenState
         size: widget.size,
         hours: widget.hours,
         helpId: widget.helpId,
-        sessionId: widget.sessionId,
+
       );
 
       final orderId = data['orderId'];
@@ -239,7 +239,7 @@ class _StoreStep4PaymentScreenState
                   size: widget.size,
                   hours: widget.hours,
                   ratePerHour: widget.ratePerHour,
-sessionId: widget.sessionId,
+
                   helpId: widget.helpId,
                 ),
               ),

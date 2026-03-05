@@ -12,12 +12,12 @@ class StoreStep3OtpScreen extends StatefulWidget {
     required this.size,
     required this.hours,
     required this.ratePerHour,
-required this.sessionId,
+
 
     required this.helpId,
   });
 final String helpId;
-final String sessionId;
+
 
   final String phoneNumber;
   final String size;
@@ -140,7 +140,7 @@ class _StoreStep3OtpScreenState extends State<StoreStep3OtpScreen> {
             size: widget.size,
             hours: widget.hours,
             ratePerHour: widget.ratePerHour,
-sessionId: widget.sessionId,
+
 
             helpId: widget.helpId,
           ),

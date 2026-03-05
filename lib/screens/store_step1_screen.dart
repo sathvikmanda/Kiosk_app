@@ -3,15 +3,11 @@ import '../core/app_colors.dart';
 import '../core/app_text.dart';
 import '../services/api_service.dart';
 import 'store_step2_phone_screen.dart';
-import 'package:uuid/uuid.dart';
-
 
 class StoreStep1Screen extends StatefulWidget {
   final String helpId;
-final String sessionId = const Uuid().v4();
 
-
-   StoreStep1Screen({
+  const StoreStep1Screen({
     super.key,
     required this.helpId,
   });
@@ -38,21 +34,16 @@ class _StoreStep1ScreenState extends State<StoreStep1Screen> {
 
   bool get anyAvailable => sizeAvailability.values.any((v) => v);
 
-  late final String sessionId;
+  @override
+  void initState() {
+    super.initState();
+    _fetchAvailability();
+  }
 
-
-@override
-void initState() {
-  super.initState();
-  sessionId = Uuid().v4();
-  _fetchAvailability();
-}
-
-void _showError(String msg) {
-  ScaffoldMessenger.of(context)
-      .showSnackBar(SnackBar(content: Text(msg)));
-}
-
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(msg)));
+  }
 
   Future<void> _fetchAvailability() async {
     try {
@@ -175,7 +166,7 @@ void _showError(String msg) {
         ),
         OutlinedButton.icon(
           onPressed: () {
-            ApiService.stopComplaint(widget.helpId); // 🔴 stop recording
+            ApiService.stopComplaint(widget.helpId);
             Navigator.pop(context);
           },
           icon: const Icon(Icons.arrow_back),
@@ -310,44 +301,21 @@ void _showError(String msg) {
             width: double.infinity,
             height: 64,
             child: ElevatedButton(
-             onPressed: anyAvailable && !isLoading
-    ? () async {
-        setState(() => isLoading = true);
-
-        try {
-          final result = await ApiService.reserveLocker(
-            lockerId: "L00002", // or dynamic
-            size: selectedSize.toLowerCase(),
-
-            sessionId: sessionId,
-          );
-
-          if (result['success'] == true) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => StoreStep2PhoneScreen(
-                  size: selectedSize.toLowerCase(),
-
-                  hours: selectedHours,
-                  ratePerHour: hourlyRate,
-                  helpId: widget.helpId,
-                  sessionId: widget.sessionId,
-                ),
-              ),
-            );
-          } else {
-            _fetchAvailability();
-            _showError("Size just became unavailable");
-          }
-        } catch (e) {
-          _showError("Reservation failed");
-        }
-
-        setState(() => isLoading = false);
-      }
-    : null,
- 
+              onPressed: anyAvailable
+                  ? () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => StoreStep2PhoneScreen(
+                            size: selectedSize.toLowerCase(),
+                            hours: selectedHours,
+                            ratePerHour: hourlyRate,
+                            helpId: widget.helpId,
+                          ),
+                        ),
+                      );
+                    }
+                  : null,
               child: const Text('CONTINUE.'),
             ),
           ),

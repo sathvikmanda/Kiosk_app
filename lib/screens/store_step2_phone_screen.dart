@@ -11,12 +11,12 @@ class StoreStep2PhoneScreen extends StatefulWidget {
     required this.size,
     required this.hours,
     required this.ratePerHour,
-required this.sessionId,
+
 
     required this.helpId,
   });
 final String helpId;
-final String sessionId;
+
 
   final String size;
   final int hours;
@@ -222,7 +222,7 @@ void initState() {
             size: widget.size,
             hours: widget.hours,
             ratePerHour: widget.ratePerHour,
-sessionId: widget.sessionId,
+
 
             helpId: widget.helpId,
           ),

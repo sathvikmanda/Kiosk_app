@@ -6,7 +6,7 @@ import 'complaint_session.dart';
 
 
 class ApiService {
-  static const String baseUrl = "http://192.168.0.104:4000";
+  static const String baseUrl = "http://192.168.0.102:4000";
   //static const String baseUrl = "http://127.0.0.1:3000";
   static const String lockerId = "L00002";
 
@@ -18,7 +18,7 @@ class ApiService {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'action': action,
-          'source': 'kiosk-home',
+          'source': 'kiosk-home'
         }),
       );
     } catch (_) {
@@ -255,7 +255,7 @@ static Future<Map<String, dynamic>> createDropoffOrder({
   required String size,
   required int hours,
   required String helpId,
-  required String sessionId,
+
 }) async {
   final res = await http.post(
     Uri.parse('$baseUrl/terminal/dropoff'),
@@ -267,7 +267,7 @@ static Future<Map<String, dynamic>> createDropoffOrder({
       'size': size,
       'hours': hours,
       "helpId": helpId,
-      "sessionId": sessionId,
+
     }),
   );
 
