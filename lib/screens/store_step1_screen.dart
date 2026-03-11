@@ -3,6 +3,7 @@ import '../core/app_colors.dart';
 import '../core/app_text.dart';
 import '../services/api_service.dart';
 import 'store_step2_phone_screen.dart';
+import '../services/audio_service.dart';
 
 class StoreStep1Screen extends StatefulWidget {
   final String helpId;
@@ -37,6 +38,9 @@ class _StoreStep1ScreenState extends State<StoreStep1Screen> {
   @override
   void initState() {
     super.initState();
+      Future.delayed(const Duration(milliseconds: 300), () {
+    AudioService.play(AudioEvent.storeselect);
+  });
     _fetchAvailability();
   }
 

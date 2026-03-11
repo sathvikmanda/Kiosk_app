@@ -17,6 +17,7 @@ import 'store_step1_screen.dart';
 import 'send_step3_delivery_estimate_screen.dart';
 import 'locker_opened_screen.dart';
 import '../services/api_service.dart';
+import '../services/audio_service.dart'; // 👈 ADD
 import 'delivery_step1_recipient_phone_screen.dart';
 import 'drop_step1_phone_screen.dart';
 import 'overstay_payment_screen.dart';
@@ -37,20 +38,22 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
   late final AnimationController _pulseController;
   late final Animation<double> _pulse;
 
-bool _loading = false;
+  bool _loading = false;
   bool _scanInProgress = false;
-bool _recordingStartInProgress = false; // ← ADD THIS
-String? _errorText;
+  bool _recordingStartInProgress = false;
+  String? _errorText;
 
+  // 👇 ADD THESE
+  bool _showAudioTester = false;
+  double _testBalance = 0.0;
+  AudioEvent _selectedEvent = AudioEvent.closelocker;
 
   final LockerStateService _lockerState = LockerStateService();
-
   bool _showInactivityWarning = false;
 
   @override
   void initState() {
     super.initState();
-    //_lockerState.start(); //FOR LOCKER POOLING
 
     _pulseController = AnimationController(
       vsync: this,
@@ -84,73 +87,65 @@ String? _errorText;
 
   @override
   void dispose() {
-   // _cameraController.dispose();
     InactivityController().dispose();
     _pulseController.dispose();
     super.dispose();
   }
 
-void _softReset() {
-  setState(() {
-    _code.clear();
-    _errorText = null;
-    _loading = false;
-    _scanInProgress = false;
-    _recordingStartInProgress = false; // ← ADD THIS
-    _showInactivityWarning = false;
-  });
-}
+  void _softReset() {
+    setState(() {
+      _code.clear();
+      _errorText = null;
+      _loading = false;
+      _scanInProgress = false;
+      _recordingStartInProgress = false;
+      _showInactivityWarning = false;
+      _showAudioTester = false; // 👈 ADD
+    });
+  }
 
   // ================= QR SCAN =================
 
- Future<void> _handleScan(String raw) async {
-  
-  if (_scanInProgress) return;
-  _scanInProgress = true;
+  Future<void> _handleScan(String raw) async {
+    if (_scanInProgress) return;
+    _scanInProgress = true;
 
-  try {
-    // 🔥 USE SAME API AS MANUAL CODE ENTRY
-    final response = await ApiService.unlockWithCode(raw);
-    if (!mounted) return;
+    try {
+      final response = await ApiService.unlockWithCode(raw);
+      if (!mounted) return;
 
-    // -------- OVERSTAY FLOW --------
-    if (response['paymentRequired'] == true) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => OverstayPaymentScreen(
-            parcelId: response['parcelId'],
-            amount: response['amount'],
-            usageSummary:
-                Map<String, dynamic>.from(response['usageSummary']),
-            parcelRaw: Map<String, dynamic>.from(response),
+      if (response['paymentRequired'] == true) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => OverstayPaymentScreen(
+              parcelId: response['parcelId'],
+              amount: response['amount'],
+              usageSummary: Map<String, dynamic>.from(response['usageSummary']),
+              parcelRaw: Map<String, dynamic>.from(response),
+            ),
           ),
-        ),
-      );
-      return;
-    }
+        );
+        return;
+      }
 
-    // -------- NORMAL UNLOCK --------
-    if (response['success'] == true) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => LockerOpenedScreen(
-            accessCode: raw,
+      if (response['success'] == true) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => LockerOpenedScreen(accessCode: raw),
           ),
-        ),
-      );
-      return;
-    }
+        );
+        return;
+      }
 
-    throw Exception(response['message'] ?? 'Invalid QR');
-  } catch (e) {
-    debugPrint('QR UNLOCK ERROR => $e');
-  } finally {
-    _scanInProgress = false;
+      throw Exception(response['message'] ?? 'Invalid QR');
+    } catch (e) {
+      debugPrint('QR UNLOCK ERROR => $e');
+    } finally {
+      _scanInProgress = false;
+    }
   }
-}
-
 
   // ================= KEYPAD =================
 
@@ -171,94 +166,75 @@ void _softReset() {
     });
   }
 
-Future<void> _submitCode() async {
-  
-  final accessCode = _code.join();
+  Future<void> _submitCode() async {
+    final accessCode = _code.join();
 
-  setState(() {
-    _loading = true;
-    _errorText = null;
-  });
+    setState(() {
+      _loading = true;
+      _errorText = null;
+    });
 
-  bool navigated = false;
+    bool navigated = false;
 
-  try {
-    final response = await ApiService.unlockWithCode(accessCode);
-    if (!mounted) return;
+    try {
+      final response = await ApiService.unlockWithCode(accessCode);
+      if (!mounted) return;
 
-    if (response['success'] == true) {
-  setState(() {
-    _loading = false;
-    _code.clear();
-  });
+      if (response['success'] == true) {
+        setState(() {
+          _loading = false;
+          _code.clear();
+        });
 
-  Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => LockerOpenedScreen(accessCode: accessCode),
-        ),
-      );
-      return;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => LockerOpenedScreen(accessCode: accessCode),
+          ),
+        );
+        return;
+      }
+
+      if (response['paymentRequired'] == true) {
+        setState(() {
+          _loading = false;
+          _code.clear();
+        });
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => OverstayPaymentScreen(
+              parcelId: response['parcelId'],
+              amount: response['amount'],
+              usageSummary: Map<String, dynamic>.from(response['usageSummary']),
+              parcelRaw: Map<String, dynamic>.from(response),
+            ),
+          ),
+        );
+        return;
+      }
+
+      throw Exception(response['message'] ?? 'Unknown error');
+    } catch (e) {
+      setState(() {
+        _errorText = e.toString().replaceFirst('Exception: ', '');
+      });
+    } finally {
+      if (!mounted || navigated) return;
+      setState(() {
+        _loading = false;
+        _code.clear();
+      });
     }
-
-// -------- OVERSTAY FLOW --------
-if (response['paymentRequired'] == true) {
-  setState(() {
-    _loading = false;
-    _code.clear();
-  });
-
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => OverstayPaymentScreen(
-        parcelId: response['parcelId'],
-        amount: response['amount'],
-        usageSummary:
-            Map<String, dynamic>.from(response['usageSummary']),
-        parcelRaw: Map<String, dynamic>.from(response),
-      ),
-    ),
-  );
-  return;
-}
-
-// -------- NORMAL UNLOCK (SAFETY) --------
-if (response['success'] == true) {
-  return;
-}
-
-// -------- ERROR --------
-throw Exception(response['message'] ?? 'Unknown error');
-
-
-
-
-    setState(() {
-      _errorText = 'Invalid code';
-    });
-
-  } catch (e) {
-    setState(() {
-      _errorText = e.toString().replaceFirst('Exception: ', '');
-    });
-  } finally {
-    if (!mounted || navigated) return;
-
-    setState(() {
-      _loading = false;
-      _code.clear();
-    });
   }
-}
-
 
   // ================= BUILD =================
 
   @override
   Widget build(BuildContext context) {
     return HiddenAdminUnlock(
-    child: Scaffold(
+      child: Scaffold(
         backgroundColor: AppColors.background,
         body: Stack(
           children: [
@@ -275,8 +251,7 @@ throw Exception(response['message'] ?? 'Unknown error');
               right: 0,
               child: Column(
                 children: [
-                  Icon(Icons.qr_code_scanner,
-                      size: 48, color: AppColors.primary),
+                  Icon(Icons.qr_code_scanner, size: 48, color: AppColors.primary),
                   const SizedBox(height: 6),
                   Text(
                     'SCAN QR HERE',
@@ -303,358 +278,312 @@ throw Exception(response['message'] ?? 'Unknown error');
               },
             ),
 
+            // 👇 AUDIO TESTER PANEL
+            if (_showAudioTester) _buildAudioTesterPanel(),
+
             if (_showInactivityWarning)
               Positioned.fill(
-                child: Container(
-                  color: Colors.black.withOpacity(0),
-                ),
+                child: Container(color: Colors.black.withOpacity(0)),
               ),
           ],
         ),
-      
-    ),
+      ),
     );
   }
 
-  // ================= LEFT PANEL =================
+  // ================= AUDIO TESTER PANEL =================
 
-Widget _leftPanel(BuildContext context) {
-  return Expanded(
-    flex: 5,
-    child: Padding(
-      padding: const EdgeInsets.fromLTRB(48, 56, 48, 48),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'DropPoint',
-            style: AppText.titleXL.copyWith(
-              color: AppColors.primary,
-              fontSize: 44,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text('What would you like to do?', style: AppText.muted),
-          const SizedBox(height: 40),
-
-          // 🔥 Buttons fill remaining height equally
-          Expanded(
-            child: Column(
-              children: [
-
-                // SEND
-                Expanded(
-                  child: _actionButton(
-                    icon: Icons.local_shipping_rounded,
-                    title: 'Send',
-                    subtitle: 'Courier pickup from locker',
-                    onTap: () {
-                      ApiService.trackLockerClick(service: 'send');
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              const SendStep3DeliveryEstimateScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // DROP
-                Expanded(
-                  child: _actionButton(
-                    icon: Icons.move_to_inbox_outlined,
-                    title: 'Drop',
-                    subtitle: 'Leave item for someone else',
-                    onTap: () async {
-  if (_recordingStartInProgress) return;
-  _recordingStartInProgress = true;
-  try {
-    ApiService.trackLockerClick(service: 'drop');
-    final helpId = await ApiService.startComplaintIfNeeded();
-    if (helpId == null) return;
-    InactivityController().activeHelpId = helpId;
-    if (!mounted) return;
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => DropStep1PhoneScreen(
-          dropMode: DropMode.personal,
-          helpId: helpId,
+  Widget _buildAudioTesterPanel() {
+    return Positioned(
+      bottom: 20,
+      left: 20,
+      right: 20,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.92),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.primary, width: 1.5),
         ),
-      ),
-    );
-  } finally {
-    if (mounted) setState(() => _recordingStartInProgress = false);
-  }
-},
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '🎛️  Audio Tester',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1,
                   ),
                 ),
-
-                const SizedBox(height: 24),
-
-                // STORE
-                Expanded(
-                  child: _actionButton(
-                    icon: Icons.archive_outlined,
-                    title: 'Store',
-                    subtitle: 'Keep items temporarily',
-                    onTap: () async {
-  if (_recordingStartInProgress) return;
-  _recordingStartInProgress = true;
-  try {
-    ApiService.trackLockerClick(service: 'store');
-    final helpId = await ApiService.startComplaintIfNeeded();
-    if (helpId == null) return;
-    InactivityController().activeHelpId = helpId;
-    if (!mounted) return;
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => StoreStep1Screen(helpId: helpId),
-      ),
-    );
-  } finally {
-    if (mounted) setState(() => _recordingStartInProgress = false);
-  }
-},
-                  ),
+                GestureDetector(
+                  onTap: () {
+                    AudioService.stop();
+                    setState(() => _showAudioTester = false);
+                  },
+                  child: const Icon(Icons.close, color: Colors.white54, size: 22),
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
 
+            const SizedBox(height: 16),
 
-  // ================= RIGHT PANEL =================
-
-Widget _rightPanel(BuildContext context) {
-  final keys = [
-    '1','2','3',
-    '4','5','6',
-    '7','8','9',
-    'Clear','0','⌫'
-  ];
-
-  return Expanded(
-    flex: 4,
-    child: Container(
-      color: AppColors.panel,
-      padding: const EdgeInsets.fromLTRB(40, 56, 40, 32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Pickup / Drop Code',
-                    style: AppText.titleL.copyWith(
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Enter code to open locker',
-                    style: AppText.muted,
-                  ),
-                ],
-              ),
-
-              // 🔹 HELP BUTTON
-              Material(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(14),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(14),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const HelpScreen(),
+            // Sound selector
+            Text('Sound', style: TextStyle(color: Colors.white54, fontSize: 12)),
+            const SizedBox(height: 8),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: AudioEvent.values.map((event) {
+                  final selected = _selectedEvent == event;
+                  return GestureDetector(
+                    onTap: () => setState(() => _selectedEvent = event),
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: selected ? AppColors.primary : Colors.white10,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: selected ? AppColors.primary : Colors.white24,
+                        ),
                       ),
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 10,
-                    ),
-                    child: Row(
-                      children: const [
-                        Icon(
-                          Icons.help_outline,
-                          color: AppColors.card,
-                          size: 20,
+                      child: Text(
+                        event.name,
+                        style: TextStyle(
+                          color: selected ? Colors.black : Colors.white70,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
                         ),
-                        SizedBox(width: 8),
-                        Text(
-                          "HELP",
-                          style: TextStyle(
-                            color: AppColors.card,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 40),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(
-              codeLength,
-              (i) => _codeBox(
-                i < _code.length ? _code[i] : '',
+                  );
+                }).toList(),
               ),
             ),
-          ),
 
-          const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
-          if (_errorText != null)
+            // Balance slider
+            Row(
+              children: [
+                const Text('🔈 L', style: TextStyle(color: Colors.white54, fontSize: 13)),
+                Expanded(
+                  child: Slider(
+                    value: _testBalance,
+                    min: -1.0,
+                    max: 1.0,
+                    divisions: 20,
+                    activeColor: AppColors.primary,
+                    inactiveColor: Colors.white12,
+                    onChanged: (val) => setState(() => _testBalance = val),
+                  ),
+                ),
+                const Text('R 🔉', style: TextStyle(color: Colors.white54, fontSize: 13)),
+              ],
+            ),
+
+            // Balance value display
             Center(
               child: Text(
-                _errorText!,
-                style: const TextStyle(
-                  color: Colors.redAccent,
-                  fontSize: 13,
+                'Balance: ${_testBalance.toStringAsFixed(2)}  '
+                '(${_testBalance < -0.1 ? "Left dominant" : _testBalance > 0.1 ? "Right dominant" : "Center"})',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ),
 
-          const SizedBox(height: 24),
+            const SizedBox(height: 16),
 
-          Expanded(
-            child: GridView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: keys.length,
-              gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                mainAxisExtent: 72,
-              ),
-              itemBuilder: (_, i) => _key(keys[i]),
+            // Action buttons
+            Row(
+              children: [
+                // Play Once
+                Expanded(
+                  child: _testerButton(
+                    label: '▶ Play Once',
+                    color: Colors.white10,
+                    onTap: () => AudioService.playWithBalance(_selectedEvent, _testBalance),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                // Loop
+                Expanded(
+                  child: _testerButton(
+                    label: '🔁 Loop',
+                    color: Colors.white10,
+                    onTap: () => AudioService.loopWithBalance(_selectedEvent, _testBalance),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                // Spatial
+                Expanded(
+                  child: _testerButton(
+                    label: '↔ Spatial',
+                    color: Colors.white10,
+                    onTap: () => AudioService.loopSpatial(_selectedEvent),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                // Stop
+                Expanded(
+                  child: _testerButton(
+                    label: '⏹ Stop',
+                    color: Colors.red.withOpacity(0.3),
+                    onTap: () => AudioService.stop(),
+                  ),
+                ),
+              ],
             ),
-          ),
-
-          const SizedBox(height: 20),
-
-          ScaleTransition(
-            scale: _code.length == codeLength
-                ? _pulse
-                : const AlwaysStoppedAnimation(1),
-            child: SizedBox(
-              width: double.infinity,
-              height: 76,
-              child: ElevatedButton(
-                onPressed:
-                    (_code.length == codeLength && !_loading)
-                        ? _submitCode
-                        : null,
-                child: _loading
-                    ? const CircularProgressIndicator(
-                        color: Colors.black,
-                      )
-                    : const Text(
-                        'SUBMIT',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 22,
-                        ),
-                      ),
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-  // ================= COMPONENTS =================
-
-Widget _actionButton({
-  required IconData icon,
-  required String title,
-  required String subtitle,
-  required VoidCallback onTap,
-}) {
-  return Material(
-    color: AppColors.panel,
-    borderRadius: BorderRadius.circular(24),
-    child: InkWell(
-      borderRadius: BorderRadius.circular(24),
+  Widget _testerButton({
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
       onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.white12),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ================= LEFT PANEL =================
+
+  Widget _leftPanel(BuildContext context) {
+    return Expanded(
+      flex: 5,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-        child: Row(
+        padding: const EdgeInsets.fromLTRB(48, 56, 48, 48),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-            // 🔥 ICON BOX
-            ScaleTransition(
-  scale: _pulse,
-  child: Container(
-              width: 90,
-              height: 90,
-              decoration: BoxDecoration(
-                color: AppColors.card,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
+            // 👇 LONG PRESS "DropPoint" to open audio tester
+            GestureDetector(
+              onLongPress: () {
+                setState(() => _showAudioTester = !_showAudioTester);
+              },
+              child: Text(
+                'DropPoint',
+                style: AppText.titleXL.copyWith(
                   color: AppColors.primary,
-                  width: 2,
+                  fontSize: 44,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
-              child: Icon(
-                icon,
-                size: 48, // 🔥 Bigger icon
-                color: AppColors.primary,
-              ),
             ),
-        ),
 
-            const SizedBox(width: 28),
+            const SizedBox(height: 10),
+            Text('What would you like to do?', style: AppText.muted),
+            const SizedBox(height: 40),
 
-            // TEXT
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    title,
-                    style: AppText.titleL.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.primary,
+                  Expanded(
+                    child: _actionButton(
+                      icon: Icons.local_shipping_rounded,
+                      title: 'Send',
+                      subtitle: 'Courier pickup from locker',
+                      onTap: () {
+                        ApiService.trackLockerClick(service: 'send');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const SendStep3DeliveryEstimateScreen(),
+                          ),
+                        );
+                      },
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    subtitle,
-                    style: AppText.muted,
+                  const SizedBox(height: 24),
+                  Expanded(
+                    child: _actionButton(
+                      icon: Icons.move_to_inbox_outlined,
+                      title: 'Drop',
+                      subtitle: 'Leave item for someone else',
+                      onTap: () async {
+                        if (_recordingStartInProgress) return;
+                        _recordingStartInProgress = true;
+                        try {
+                          ApiService.trackLockerClick(service: 'drop');
+                          final helpId = await ApiService.startComplaintIfNeeded();
+                          if (helpId == null) return;
+                          InactivityController().activeHelpId = helpId;
+                          if (!mounted) return;
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => DropStep1PhoneScreen(
+                                dropMode: DropMode.personal,
+                                helpId: helpId,
+                              ),
+                            ),
+                          );
+                        } finally {
+                          if (mounted) setState(() => _recordingStartInProgress = false);
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Expanded(
+                    child: _actionButton(
+                      icon: Icons.archive_outlined,
+                      title: 'Store',
+                      subtitle: 'Keep items temporarily',
+                      onTap: () async {
+                        if (_recordingStartInProgress) return;
+                        _recordingStartInProgress = true;
+                        try {
+                          ApiService.trackLockerClick(service: 'store');
+                          final helpId = await ApiService.startComplaintIfNeeded();
+                          if (helpId == null) return;
+                          InactivityController().activeHelpId = helpId;
+                          if (!mounted) return;
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => StoreStep1Screen(helpId: helpId),
+                            ),
+                          );
+                        } finally {
+                          if (mounted) setState(() => _recordingStartInProgress = false);
+                        }
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -662,9 +591,191 @@ Widget _actionButton({
           ],
         ),
       ),
-    ),
-  );
-}
+    );
+  }
+
+  // ================= RIGHT PANEL =================
+
+  Widget _rightPanel(BuildContext context) {
+    final keys = ['1','2','3','4','5','6','7','8','9','Clear','0','⌫'];
+
+    return Expanded(
+      flex: 4,
+      child: Container(
+        color: AppColors.panel,
+        padding: const EdgeInsets.fromLTRB(40, 56, 40, 32),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Pickup / Drop Code',
+                      style: AppText.titleL.copyWith(color: AppColors.primary),
+                    ),
+                    const SizedBox(height: 8),
+                    Text('Enter code to open locker', style: AppText.muted),
+                  ],
+                ),
+                Material(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(14),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const HelpScreen()),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                      child: Row(
+                        children: const [
+                          Icon(Icons.help_outline, color: AppColors.card, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            "HELP",
+                            style: TextStyle(
+                              color: AppColors.card,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 40),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: List.generate(
+                codeLength,
+                (i) => _codeBox(i < _code.length ? _code[i] : ''),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            if (_errorText != null)
+              Center(
+                child: Text(
+                  _errorText!,
+                  style: const TextStyle(
+                    color: Colors.redAccent,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+
+            const SizedBox(height: 24),
+
+            Expanded(
+              child: GridView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: keys.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  mainAxisExtent: 72,
+                ),
+                itemBuilder: (_, i) => _key(keys[i]),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            ScaleTransition(
+              scale: _code.length == codeLength
+                  ? _pulse
+                  : const AlwaysStoppedAnimation(1),
+              child: SizedBox(
+                width: double.infinity,
+                height: 76,
+                child: ElevatedButton(
+                  onPressed: (_code.length == codeLength && !_loading) ? _submitCode : null,
+                  child: _loading
+                      ? const CircularProgressIndicator(color: Colors.black)
+                      : const Text(
+                          'SUBMIT',
+                          style: TextStyle(fontWeight: FontWeight.w900, fontSize: 22),
+                        ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ================= COMPONENTS =================
+
+  Widget _actionButton({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: AppColors.panel,
+      borderRadius: BorderRadius.circular(24),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+          child: Row(
+            children: [
+              ScaleTransition(
+                scale: _pulse,
+                child: Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    color: AppColors.card,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppColors.primary, width: 2),
+                  ),
+                  child: Icon(icon, size: 48, color: AppColors.primary),
+                ),
+              ),
+              const SizedBox(width: 28),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      title,
+                      style: AppText.titleL.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(subtitle, style: AppText.muted),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _codeBox(String value) {
     final filled = value.isNotEmpty;
@@ -675,9 +786,7 @@ Widget _actionButton({
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: filled ? AppColors.primary : Colors.white12,
-        ),
+        border: Border.all(color: filled ? AppColors.primary : Colors.white12),
       ),
       child: Text(
         filled ? value : '•',
@@ -689,9 +798,6 @@ Widget _actionButton({
       ),
     );
   }
-
-
-
 
   Widget _key(String label) {
     return Material(
@@ -721,12 +827,10 @@ Widget _actionButton({
       child: InkWell(
         borderRadius: BorderRadius.circular(22),
         onTap: () {
-          
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) =>
-                  const DeliveryStep1RecipientPhoneScreen(),
+              builder: (_) => const DeliveryStep1RecipientPhoneScreen(),
             ),
           );
         },

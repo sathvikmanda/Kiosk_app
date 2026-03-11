@@ -8,6 +8,7 @@ import '../utils/immersive_mode.dart';
 
 import '../services/api_service.dart';
 import 'store_step6_access_code_screen.dart';
+import '../services/audio_service.dart';
 
 class StoreStep5LockerOpeningScreen extends StatefulWidget {
   const StoreStep5LockerOpeningScreen({
@@ -15,11 +16,13 @@ class StoreStep5LockerOpeningScreen extends StatefulWidget {
     required this.phoneNumber,
     required this.accessCode,
      required this.helpId,
+     this.compartmentId,
   });
 final String helpId;
 
   final String phoneNumber;
   final String accessCode;
+  final int? compartmentId;
 
   @override
   State<StoreStep5LockerOpeningScreen> createState() =>
@@ -35,10 +38,17 @@ class _StoreStep5LockerOpeningScreenState
   void initState() {
     super.initState();
     ImmersiveMode.enable();
-
-    // Simulate locker opening delay
+      Future.delayed(const Duration(milliseconds: 300), () {
+    if (widget.compartmentId != null) {
+      // Maps compartmentId 1→-1.0 (full left), 5→+1.0 (full right)
+      final double balance = ((widget.compartmentId! ) / 4.0) * 2.0 - 1.0;
+      AudioService.playWithBalance(AudioEvent.lockerDirection, balance);
+    }
+  });
     _timer = Timer(const Duration(seconds: 4), _goToAccessCode);
   }
+
+  
 
   void _goToAccessCode() {
     if (!mounted) return;

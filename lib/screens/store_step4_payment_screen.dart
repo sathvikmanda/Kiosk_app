@@ -18,8 +18,6 @@ class StoreStep4PaymentScreen extends StatefulWidget {
     required this.size,
     required this.hours,
     required this.ratePerHour,
-
-
     required this.helpId,
   });
 
@@ -27,10 +25,7 @@ class StoreStep4PaymentScreen extends StatefulWidget {
   final String size;
   final int hours;
   final int ratePerHour;
-
-
-final String helpId;
-
+  final String helpId;
 
   @override
   State<StoreStep4PaymentScreen> createState() =>
@@ -49,7 +44,7 @@ class _StoreStep4PaymentScreenState
 
   // ================= DISPLAY ONLY =================
   int get prepaid => widget.hours * widget.ratePerHour;
-  int get subtotal => prepaid ;
+  int get subtotal => prepaid;
   int get total => subtotal;
 
   String? get helpId => ComplaintSession.helpId;
@@ -77,15 +72,16 @@ class _StoreStep4PaymentScreenState
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.immersiveSticky,
     );
+    
     if (widget.hours <= 0) {
-    _showError('Invalid duration selected');
-    return;
-  }
+      _showError('Invalid duration selected');
+      return;
+    }
 
-  if (widget.hours > 168) {
-    _showError('Maximum storage duration exceeded');
-    return;
-  }
+    if (widget.hours > 168) {
+      _showError('Maximum storage duration exceeded');
+      return;
+    }
 
     setState(() => isLoading = true);
 
@@ -95,7 +91,6 @@ class _StoreStep4PaymentScreenState
         size: widget.size,
         hours: widget.hours,
         helpId: widget.helpId,
-
       );
 
       final orderId = data['orderId'];
@@ -133,7 +128,8 @@ class _StoreStep4PaymentScreenState
           'wallet': true,
         },
       });
-    } catch (_) {
+    } catch (e) {
+      print('[Payment] Error: $e');
       _showError('Payment initialization failed');
     } finally {
       setState(() => isLoading = false);
@@ -142,42 +138,44 @@ class _StoreStep4PaymentScreenState
 
   // ================= PAYMENT CALLBACK =================
 
-  Future<void> _onPaymentSuccess(
-      PaymentSuccessResponse res) async {
-    // 🔥 Restore system UI
-   
-
-    if (res.orderId == null ||
-        res.signature == null ||
-        parcelId == null) {
-      _showError('Payment verification failed');
-      return;
-    }
-
-    try {
-      final result = await ApiService.verifyPayment(
-        orderId: res.orderId!,
-        paymentId: res.paymentId!,
-        signature: res.signature!,
-        parcelId: parcelId!,
-         helpId: helpId,
-      );
-      ImmersiveMode.enable();
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => StoreStep5LockerOpeningScreen(
-            phoneNumber: widget.phoneNumber,
-            accessCode: result['accessCode'],
-            helpId: widget.helpId,
-          ),
-        ),
-      );
-    } catch (_) {
-      _showError('Payment verification failed');
-    }
+Future<void> _onPaymentSuccess(PaymentSuccessResponse res) async {
+  if (res.orderId == null || res.signature == null || parcelId == null) {
+    _showError('Payment verification failed');
+    return;
   }
+
+  try {
+    final result = await ApiService.verifyPayment(
+      orderId: res.orderId!,
+      paymentId: res.paymentId!,
+      signature: res.signature!,
+      parcelId: parcelId!,
+      helpId: helpId,
+    );
+    ImmersiveMode.enable();
+
+    // Parse compartmentId from result
+    final rawCompartmentId = result['compartmentId'];
+    final int? compartmentId = rawCompartmentId != null
+        ? int.tryParse(rawCompartmentId.toString())
+        : null;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => StoreStep5LockerOpeningScreen(
+          phoneNumber: widget.phoneNumber,
+          accessCode: result['accessCode'],
+          helpId: widget.helpId,
+          compartmentId: compartmentId, // ← pass it
+        ),
+      ),
+    );
+  } catch (e) {
+    print('[Payment] Verification error: $e');
+    _showError('Payment verification failed');
+  }
+}
 
   void _onPaymentError(PaymentFailureResponse res) {
     ImmersiveMode.enable();
@@ -239,7 +237,6 @@ class _StoreStep4PaymentScreenState
                   size: widget.size,
                   hours: widget.hours,
                   ratePerHour: widget.ratePerHour,
-
                   helpId: widget.helpId,
                 ),
               ),
@@ -265,7 +262,6 @@ class _StoreStep4PaymentScreenState
           const SizedBox(height: 16),
           const Divider(),
           _row('Prepaid Storage', '₹$prepaid'),
-
           const Divider(height: 32),
           _row(
             'TOTAL PAYABLE',

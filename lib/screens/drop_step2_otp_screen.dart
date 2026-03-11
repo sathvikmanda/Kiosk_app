@@ -7,6 +7,7 @@ import '../models/drop_mode.dart';
 import '../services/api_service.dart';
 import 'drop_step3_dashboard_screen.dart';
 import 'drop_self_auth_phone_screen.dart';
+import '../services/audio_service.dart';
 
 class DropStep2OtpScreen extends StatefulWidget {
   const DropStep2OtpScreen({
@@ -36,6 +37,9 @@ class _DropStep2OtpScreenState extends State<DropStep2OtpScreen> {
   @override
   void initState() {
     super.initState();
+    Future.delayed(const Duration(milliseconds: 300), () {
+    AudioService.play(AudioEvent.enterotp);
+  });
     _startTimer();
   }
 

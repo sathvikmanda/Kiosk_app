@@ -29,11 +29,12 @@ class _DropStep1PhoneScreenState extends State<DropStep1PhoneScreen> {
 
   @override
 void initState() {
+
   super.initState();
 
   // Delay slightly so audio doesn't clash with navigation
   Future.delayed(const Duration(milliseconds: 300), () {
-    AudioService.play(AudioEvent.enterPhone);
+    AudioService.play(AudioEvent.recipientPhone);
   });
 }
 

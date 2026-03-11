@@ -4,6 +4,7 @@ import '../core/app_colors.dart';
 import '../core/app_text.dart';
 import '../services/api_service.dart';
 import 'store_step4_payment_screen.dart';
+import '../services/audio_service.dart';
 
 class StoreStep3OtpScreen extends StatefulWidget {
   const StoreStep3OtpScreen({
@@ -43,6 +44,10 @@ class _StoreStep3OtpScreenState extends State<StoreStep3OtpScreen> {
   @override
   void initState() {
     super.initState();
+      // Delay slightly so audio doesn't clash with navigation
+  Future.delayed(const Duration(milliseconds: 300), () {
+    AudioService.play(AudioEvent.enterotp);
+  });
     _startResendTimer();
   }
 
