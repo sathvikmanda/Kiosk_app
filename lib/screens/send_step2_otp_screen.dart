@@ -5,6 +5,7 @@ import '../core/app_colors.dart';
 import '../core/app_text.dart';
 import '../services/api_service.dart';
 import 'send_address_dashboard_screen.dart';
+import '../services/audio_service.dart';
 
 class SendStep2OtpScreen extends StatefulWidget {
   const SendStep2OtpScreen({
@@ -44,6 +45,9 @@ class _SendStep2OtpScreenState extends State<SendStep2OtpScreen> {
   @override
   void initState() {
     super.initState();
+      Future.delayed(const Duration(milliseconds: 300), () {
+    AudioService.play(AudioEvent.enterotp);
+  });
     _startTimer();
   }
 

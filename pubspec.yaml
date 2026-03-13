@@ -43,6 +43,10 @@ flutter:
     - assets/audio/knock.mp3
     - assets/audio/rec_phone.mp3
     - assets/audio/locker_direction.mp3
+    - assets/audio/delivery_estimation.mp3
+    - assets/audio/select_address.mp3
+    - assets/audio/select_service.mp3
+    - assets/audio/selectdornewd.mp3
 
   fonts:
     - family: Sora

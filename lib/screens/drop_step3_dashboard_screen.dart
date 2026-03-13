@@ -6,6 +6,7 @@ import '../services/api_service.dart';
 import 'drop_step4_payment_screen.dart';
 import '../models/drop_mode.dart';
 import 'locker_opened_screen.dart';
+import '../services/audio_service.dart';
 
 
 const Color navy = Color(0xFF1E293B); // slate-800
@@ -65,6 +66,9 @@ bool allLockersUnavailable = false;
   @override
   void initState() {
     super.initState();
+     Future.delayed(const Duration(milliseconds: 300), () {
+    AudioService.play(AudioEvent.storeselect);
+  });
     _fetchAvailability();
   }
 

@@ -5,6 +5,7 @@ import '../core/app_text.dart';
 import '../services/api_service.dart';
 import 'send_step1_phone_screen.dart';
 import '../services/audio_service.dart';
+import '../services/audio_service.dart';
 
 class SendStep3DeliveryEstimateScreen extends StatefulWidget {
   const SendStep3DeliveryEstimateScreen({super.key});
@@ -48,6 +49,9 @@ class _SendStep3DeliveryEstimateScreenState
   @override
   void initState() {
     super.initState();
+           Future.delayed(const Duration(milliseconds: 300), () {
+    AudioService.play(AudioEvent.deliveryestimate);
+  });
     _fetchAvailableSizes();
     
   }

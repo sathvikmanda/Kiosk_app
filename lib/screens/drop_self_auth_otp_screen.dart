@@ -6,6 +6,7 @@ import '../core/app_text.dart';
 import '../models/drop_mode.dart';
 import '../services/api_service.dart';
 import 'drop_step3_dashboard_screen_auth.dart';
+import '../services/audio_service.dart';
 
 class DropSelfAuthOtpScreen extends StatefulWidget {
   const DropSelfAuthOtpScreen({
@@ -39,6 +40,9 @@ class _DropSelfAuthOtpScreenState
   @override
   void initState() {
     super.initState();
+    Future.delayed(const Duration(milliseconds: 300), () {
+    AudioService.play(AudioEvent.enterotp);
+  });
     _startTimer();
   }
 

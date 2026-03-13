@@ -4,6 +4,7 @@ import '../core/app_colors.dart';
 import '../core/app_text.dart';
 import '../services/api_service.dart';
 import 'delivery_self_auth_otp_screen.dart';
+import '../services/audio_service.dart';
 
 class DeliverySelfAuthPhoneScreen extends StatefulWidget {
   const DeliverySelfAuthPhoneScreen({
@@ -24,6 +25,14 @@ class _DeliverySelfAuthPhoneScreenState
   final List<String> _digits = [];
 
   String get senderPhone => _digits.join();
+void initState() {
+  super.initState();
+
+  // Delay slightly so audio doesn't clash with navigation
+  Future.delayed(const Duration(milliseconds: 300), () {
+    AudioService.play(AudioEvent.enterPhone);
+  });
+}
 
   void _onKey(String v) {
     setState(() {

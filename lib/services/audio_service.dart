@@ -13,7 +13,12 @@ enum AudioEvent {
   storeselect,
   knock,
   recipientPhone,
-  lockerDirection
+  lockerDirection,
+  deliveryestimate,
+  selectaddress,
+  selectservice,
+  selectdornewd
+  
 }
 
 class AudioService {
@@ -114,6 +119,14 @@ class AudioService {
         return 'rec_phone.mp3';
       case AudioEvent.lockerDirection:
         return 'locker_direction.mp3';
+      case AudioEvent.deliveryestimate:
+        return 'delivery_estimation.mp3';
+      case AudioEvent.selectaddress:
+        return 'select_address.mp3';
+      case AudioEvent.selectservice:
+        return 'select_service.mp3';
+      case AudioEvent.selectdornewd:
+        return 'selectdornewd.mp3';
     }
   }
 }

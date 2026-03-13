@@ -4,6 +4,7 @@ import '../core/app_text.dart';
 import '../models/drop_mode.dart';
 import '../services/api_service.dart';
 import 'drop_self_auth_otp_screen.dart';
+import '../services/audio_service.dart';
 
 class DropSelfAuthPhoneScreen extends StatefulWidget {
   const DropSelfAuthPhoneScreen({
@@ -29,6 +30,14 @@ class _DropSelfAuthPhoneScreenState
 
   String get senderPhone => _digits.join();
 
+void initState() {
+  super.initState();
+
+  // Delay slightly so audio doesn't clash with navigation
+  Future.delayed(const Duration(milliseconds: 300), () {
+    AudioService.play(AudioEvent.enterPhone);
+  });
+}
   void _onKey(String v) {
     setState(() {
       if (v == 'Clear') {

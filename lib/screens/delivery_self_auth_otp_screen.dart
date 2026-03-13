@@ -6,6 +6,7 @@ import '../core/app_text.dart';
 import '../services/api_service.dart';
 import 'delivery_step2_dashboard_screen_auth.dart';
 import 'delivery_self_auth_phone_screen.dart';
+import '../services/audio_service.dart';
 
 class DeliverySelfAuthOtpScreen extends StatefulWidget {
   const DeliverySelfAuthOtpScreen({
@@ -35,6 +36,9 @@ class _DeliverySelfAuthOtpScreenState
   @override
   void initState() {
     super.initState();
+    Future.delayed(const Duration(milliseconds: 300), () {
+    AudioService.play(AudioEvent.enterotp);
+  });
     _startTimer();
   }
 

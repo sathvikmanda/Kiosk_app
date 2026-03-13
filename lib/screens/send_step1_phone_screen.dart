@@ -4,6 +4,7 @@ import '../core/app_text.dart';
 import '../services/api_service.dart';
 
 import 'send_step2_otp_screen.dart';
+import '../services/audio_service.dart';
 
 class SendStep1PhoneScreen extends StatefulWidget {
   const SendStep1PhoneScreen({
@@ -35,6 +36,14 @@ class _SendStep1PhoneScreenState extends State<SendStep1PhoneScreen> {
   final List<String> _phone = [];
 
   bool _loading = false;
+  void initState() {
+  super.initState();
+
+  // Delay slightly so audio doesn't clash with navigation
+  Future.delayed(const Duration(milliseconds: 300), () {
+    AudioService.play(AudioEvent.enterPhone);
+  });
+}
 
   void _onKeyPress(String value) {
     if (_loading) return;

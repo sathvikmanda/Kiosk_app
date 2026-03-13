@@ -4,7 +4,8 @@ import '../core/app_text.dart';
 import '../services/api_service.dart';
 import 'send_delivery_estimate_after_address_screen.dart';
 import 'send_step4_link_sent_screen.dart';
-import 'send_step1_phone_screen.dart'; // ✅ ADDED
+import 'send_step1_phone_screen.dart';
+import '../services/audio_service.dart'; // ✅ ADDED
 
 class SendAddressDashboardScreen extends StatefulWidget {
   const SendAddressDashboardScreen({
@@ -34,6 +35,9 @@ class _SendAddressDashboardScreenState
   @override
   void initState() {
     super.initState();
+      Future.delayed(const Duration(milliseconds: 300), () {
+    AudioService.play(AudioEvent.selectdornewd);
+  });
     receiversFuture = ApiService.fetchSavedReceivers(
       senderPhone: widget.phoneNumber,
     );

@@ -3,6 +3,7 @@ import '../core/app_colors.dart';
 import '../core/app_text.dart';
 import '../services/api_service.dart';
 import 'send_summary_screen.dart';
+import '../services/audio_service.dart';
 
 class SendDeliveryEstimateAfterAddressScreen extends StatefulWidget {
   const SendDeliveryEstimateAfterAddressScreen({
@@ -46,6 +47,9 @@ class _SendDeliveryEstimateAfterAddressScreenState
   @override
   void initState() {
     super.initState();
+      Future.delayed(const Duration(milliseconds: 300), () {
+    AudioService.play(AudioEvent.selectservice);
+  });
     _fetchRates();
   }
 
