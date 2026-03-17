@@ -84,7 +84,7 @@ class _OverstayPaymentScreenState
       paying = true;
       error = null;
     });
-final int totalInPaise = widget.amount * 100;
+final int totalInPaise = widget.amount;
     try {
       final order =
           await ApiService.createRazorpayOrder(

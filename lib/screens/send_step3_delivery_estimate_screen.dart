@@ -58,7 +58,7 @@ class _SendStep3DeliveryEstimateScreenState
 
   Future<void> _fetchAvailableSizes() async {
     try {
-      final sizes = await ApiService.getAvailableSizes('L00002');
+      final sizes = await ApiService.getAvailableSizes('L01');
 
       setState(() {
         availableSizes = sizes;
