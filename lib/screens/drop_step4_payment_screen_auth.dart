@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/inactivity_controller.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 import '../core/app_colors.dart';
@@ -74,6 +75,7 @@ class _DropStep4PaymentScreenAuthState
 
       parcelId = data['parcelId'];
 
+      InactivityController().pauseForPayment();
       _razorpay.open({
         'key': data['razorpayKeyId'],
         'order_id': data['orderId'],
@@ -96,6 +98,7 @@ class _DropStep4PaymentScreenAuthState
   // ================= PAYMENT CALLBACK =================
 
   Future<void> _onPaymentSuccess(PaymentSuccessResponse res) async {
+    InactivityController().resumeAfterPayment();
     if (parcelId == null) {
       _error('Invalid payment state');
       return;
@@ -125,6 +128,7 @@ class _DropStep4PaymentScreenAuthState
   }
 
   void _onPaymentError(PaymentFailureResponse res) {
+    InactivityController().resumeAfterPayment();
     _error('Payment cancelled');
   }
 

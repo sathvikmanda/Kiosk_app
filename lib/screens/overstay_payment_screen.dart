@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/inactivity_controller.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:intl/intl.dart';
 
@@ -99,6 +100,7 @@ final int totalInPaise = widget.amount * 100;
         throw Exception('Invalid payment order');
       }
 
+      InactivityController().pauseForPayment();
       _razorpay.open({
         'key': order['key'],
         'amount': order['amount'],
@@ -121,6 +123,7 @@ final int totalInPaise = widget.amount * 100;
   // ===============================
   Future<void> _onSuccess(
       PaymentSuccessResponse res) async {
+    InactivityController().resumeAfterPayment();
     try {
       final result =
           await ApiService.verifyOverstayPayment(
@@ -151,6 +154,7 @@ final int totalInPaise = widget.amount * 100;
 
   void _onPaymentError(
       PaymentFailureResponse res) {
+    InactivityController().resumeAfterPayment();
     setState(() {
       paying = false;
       error = 'Payment failed or cancelled';

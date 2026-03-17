@@ -33,6 +33,7 @@ flutter:
     - assets/images/otp_whatsapp_example.png
     - assets/audio/locker_open.mp3
     - assets/audio/locker_close.mp3
+    - assets/audio/close_locker.mp3
     - assets/audio/next_step.mp3
     - assets/audio/error.mp3
     - assets/audio/payment_success.mp3

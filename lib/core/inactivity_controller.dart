@@ -15,6 +15,7 @@ class InactivityController {
   VoidCallback? onSoftReset;
 
   bool _cameraLocked = false;
+  bool _paused = false;
 
   // ── Active session helpId ─────────────────────────────────────
   String? activeHelpId;
@@ -29,14 +30,31 @@ class InactivityController {
     debugPrint('[Inactivity] Camera unlocked');
   }
 
+  // Call when Razorpay (or any native overlay) opens
+  void pauseForPayment() {
+    _paused = true;
+    _idleTimer?.cancel();
+    _resetTimer?.cancel();
+    onHideWarning?.call();
+    debugPrint('[Inactivity] Paused for payment');
+  }
+
+  // Call when Razorpay closes (success, error, or cancel)
+  void resumeAfterPayment() {
+    _paused = false;
+    debugPrint('[Inactivity] Resumed after payment');
+    userInteracted(); // restart the idle timer fresh
+  }
+
   void userInteracted() {
+    if (_paused) return;
     _idleTimer?.cancel();
     _resetTimer?.cancel();
     onHideWarning?.call();
 
-    _idleTimer = Timer(const Duration(seconds: 30), () {
+    _idleTimer = Timer(const Duration(seconds: 60), () {
       onShowWarning?.call();
-      _resetTimer = Timer(const Duration(seconds: 10), () {
+      _resetTimer = Timer(const Duration(seconds: 30), () {
         if (_cameraLocked) {
           debugPrint('[Inactivity] Reset blocked (camera active)');
           return;
@@ -51,5 +69,6 @@ class InactivityController {
     _idleTimer?.cancel();
     _resetTimer?.cancel();
     _cameraLocked = false;
+    _paused = false;
   }
 }

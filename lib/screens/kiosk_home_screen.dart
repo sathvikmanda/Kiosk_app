@@ -81,13 +81,15 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
       _softReset();
     };
 
-    inactivity.userInteracted();
+    //inactivity.userInteracted();
     KioskController.enable();
+    //_lockerState.start();
   }
 
   @override
   void dispose() {
     InactivityController().dispose();
+    _lockerState.dispose();
     _pulseController.dispose();
     super.dispose();
   }
@@ -517,14 +519,24 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
                       icon: Icons.local_shipping_rounded,
                       title: 'Send',
                       subtitle: 'Courier pickup from locker',
-                      onTap: () {
-                        ApiService.trackLockerClick(service: 'send');
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const SendStep3DeliveryEstimateScreen(),
-                          ),
-                        );
+                      onTap: () async {
+                        if (_recordingStartInProgress) return;
+                        _recordingStartInProgress = true;
+                        try {
+                          ApiService.trackLockerClick(service: 'send');
+                          final helpId = await ApiService.startComplaintIfNeeded();
+                          if (helpId == null) return;
+                          InactivityController().activeHelpId = helpId;
+                          if (!mounted) return;
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const SendStep3DeliveryEstimateScreen(),
+                            ),
+                          );
+                        } finally {
+                          if (mounted) setState(() => _recordingStartInProgress = false);
+                        }
                       },
                     ),
                   ),

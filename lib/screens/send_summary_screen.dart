@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/inactivity_controller.dart';
 import '../core/app_colors.dart';
 import '../core/app_text.dart';
 import '../services/api_service.dart';
@@ -67,7 +68,8 @@ Future<void> _payAndContinue() async {
       amount: totalInPaise,
     );
 
-    _razorpay.open({
+    InactivityController().pauseForPayment();
+      _razorpay.open({
       'key': order['key'],
       'amount': order['amount'],
       'order_id': order['orderId'],
@@ -87,6 +89,7 @@ Future<void> _payAndContinue() async {
   // PAYMENT SUCCESS
   // ===============================
   Future<void> _onSuccess(PaymentSuccessResponse res) async {
+    InactivityController().resumeAfterPayment();
     try {
       await ApiService.verifyRazorpayPayment(
         parcelId: widget.parcelId,
@@ -115,6 +118,7 @@ Future<void> _payAndContinue() async {
   // PAYMENT ERROR
   // ===============================
   void _onError(PaymentFailureResponse res) {
+    InactivityController().resumeAfterPayment();
     setState(() => paying = false);
     _showError('Payment failed');
   }

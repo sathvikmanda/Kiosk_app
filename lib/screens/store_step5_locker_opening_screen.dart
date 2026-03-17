@@ -71,11 +71,9 @@ class _StoreStep5LockerOpeningScreenState
   void dispose() {
     _timer?.cancel();
 
-    // 🔴 SAFETY NET:
-    // If this screen is disposed WITHOUT successful navigation,
-    // resolve the complaint to avoid orphan recordings.
+    // 🔴 SAFETY NET: if disposed without forward navigation, stop the recording
     if (!_navigatedForward) {
-      ApiService.resolveComplaintIfAny();
+      ApiService.stopComplaint(widget.helpId);
     }
 
     super.dispose();

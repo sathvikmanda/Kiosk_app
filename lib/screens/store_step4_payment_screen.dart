@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/inactivity_controller.dart';
 import 'package:flutter/services.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../utils/immersive_mode.dart';
@@ -106,6 +107,7 @@ class _StoreStep4PaymentScreenState
       backendAmountPaise = amount;
       backendAmountRupees = (amount / 100).round();
 
+      InactivityController().pauseForPayment();
       _razorpay.open({
         'key': key,
         'order_id': orderId,
@@ -139,6 +141,7 @@ class _StoreStep4PaymentScreenState
   // ================= PAYMENT CALLBACK =================
 
 Future<void> _onPaymentSuccess(PaymentSuccessResponse res) async {
+    InactivityController().resumeAfterPayment();
   if (res.orderId == null || res.signature == null || parcelId == null) {
     _showError('Payment verification failed');
     return;
@@ -178,6 +181,7 @@ Future<void> _onPaymentSuccess(PaymentSuccessResponse res) async {
 }
 
   void _onPaymentError(PaymentFailureResponse res) {
+    InactivityController().resumeAfterPayment();
     ImmersiveMode.enable();
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.edgeToEdge,

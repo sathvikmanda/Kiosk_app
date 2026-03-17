@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../core/app_colors.dart';
 import '../core/app_text.dart';
+import '../core/inactivity_controller.dart';
 import '../services/api_service.dart';
 import 'send_step1_phone_screen.dart';
-import '../services/audio_service.dart';
 import '../services/audio_service.dart';
 
 class SendStep3DeliveryEstimateScreen extends StatefulWidget {
@@ -210,7 +210,14 @@ class _SendStep3DeliveryEstimateScreenState
           ],
         ),
         OutlinedButton.icon(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            final helpId = InactivityController().activeHelpId;
+            if (helpId != null) {
+              ApiService.stopComplaint(helpId); // fire and forget
+              InactivityController().activeHelpId = null;
+            }
+            Navigator.pop(context);
+          },
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           label: const Text('BACK'),
         ),
@@ -315,43 +322,40 @@ else ...[
 
           const SizedBox(height: 28),
 
-          // 🔥 SUMMARY SECTION (UNCHANGED)
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.card,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white12),
+          // Summary — hidden when no lockers available
+          if (!allLockersUnavailable) ...[
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('SUMMARY', style: AppText.titleM),
+                  const SizedBox(height: 16),
+                  _summaryRow(
+                    'Locker (${selectedSize.toUpperCase()})',
+                    '₹$lockerCost',
+                  ),
+                  const SizedBox(height: 8),
+                  _summaryRow(
+                    selectedService ?? 'Delivery',
+                    selectedService != null ? '₹$deliveryCost' : '-',
+                  ),
+                  const Divider(height: 28),
+                  _summaryRow(
+                    'TOTAL',
+                    '₹$total',
+                    isTotal: true,
+                  ),
+                ],
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('SUMMARY', style: AppText.titleM),
-                const SizedBox(height: 16),
-
-                _summaryRow(
-                  'Locker (${selectedSize.toUpperCase()})',
-                  '₹$lockerCost',
-                ),
-                const SizedBox(height: 8),
-
-                _summaryRow(
-                  selectedService ?? 'Delivery',
-                  selectedService != null ? '₹$deliveryCost' : '-',
-                ),
-
-                const Divider(height: 28),
-
-                _summaryRow(
-                  'TOTAL',
-                  '₹$total',
-                  isTotal: true,
-                ),
-              ],
-            ),
-          ),
-
-          const Spacer(),
+            const Spacer(),
+          ],
 
           SizedBox(
             width: double.infinity,
@@ -387,18 +391,17 @@ else ...[
 
 
   Widget _noLockerAvailableView() {
-  return Expanded(
-    child: Center(
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: AppColors.card,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: Colors.redAccent.withOpacity(0.6),
-            width: 1.5,
-          ),
+  return Center(
+    child: Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: Colors.redAccent.withOpacity(0.6),
+          width: 1.5,
         ),
+      ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -425,7 +428,6 @@ else ...[
           ],
         ),
       ),
-    ),
   );
 }
 

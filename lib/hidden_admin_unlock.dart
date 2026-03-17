@@ -66,7 +66,7 @@ class _AdminPinDialog extends StatefulWidget {
 
 class _AdminPinDialogState extends State<_AdminPinDialog> {
   final TextEditingController _controller = TextEditingController();
-  final String adminPin = "1234";
+  final String adminPin = "5259";
 
   @override
   Widget build(BuildContext context) {

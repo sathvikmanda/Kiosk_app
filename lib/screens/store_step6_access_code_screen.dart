@@ -33,7 +33,11 @@ class _StoreStep6AccessCodeScreenState
   @override
   void initState() {
     super.initState();
-    ApiService.resolveComplaintIfAny();
+    _resolveAndStart();
+  }
+
+  Future<void> _resolveAndStart() async {
+    await ApiService.stopComplaint(widget.helpId);
     _timer = Timer(const Duration(seconds: 10), _goHome);
   }
 

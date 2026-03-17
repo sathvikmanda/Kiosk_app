@@ -48,7 +48,13 @@ class MainActivity : FlutterActivity() {
         val componentName = ComponentName(this, MyDeviceAdminReceiver::class.java)
 
         if (dpm.isDeviceOwnerApp(packageName)) {
-            dpm.setLockTaskPackages(componentName, arrayOf(packageName))
+            dpm.setLockTaskPackages(
+                componentName,
+                arrayOf(
+                    packageName,
+                    "com.termux"  // keep Termux alive during kiosk mode
+                )
+            )
             startLockTask()
         }
     }
