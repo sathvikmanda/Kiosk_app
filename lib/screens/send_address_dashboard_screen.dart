@@ -66,7 +66,7 @@ class _SendAddressDashboardScreenState
   style: OutlinedButton.styleFrom(
     side: const BorderSide(color: Colors.white, width: 1.5),
   ),
-  child: const Text(
+  child: Text(
     'BACK',
     style: TextStyle(color: Colors.white),
   ),
@@ -112,7 +112,7 @@ class _SendAddressDashboardScreenState
               future: receiversFuture,
               builder: (context, snap) {
                 if (snap.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(child: CircularProgressIndicator());
                 }
 
                 final receivers = snap.data ?? [];
@@ -288,7 +288,7 @@ class _SendAddressDashboardScreenState
                       : _onContinue,
               child: _loading
                   ? const CircularProgressIndicator(color: Colors.black)
-                  : const Text('CONTINUE'),
+                  : Text('CONTINUE'),
             ),
           ),
         ],

@@ -73,19 +73,19 @@ class _SendTrackingSentScreenState extends State<SendTrackingSentScreen> {
                   color: AppColors.primary,
                 ),
                 const SizedBox(height: 28),
-                const Text(
+                Text(
                   'TRACKING DETAILS SENT',
                   style: AppText.titleL,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 14),
-                const Text(
+                Text(
                   'Tracking information has been\nsent to your phone.',
                   textAlign: TextAlign.center,
                   style: AppText.muted,
                 ),
                 const SizedBox(height: 36),
-                const Text(
+                Text(
                   'Tap anywhere to return home',
                   style: AppText.caption,
                 ),

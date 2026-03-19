@@ -355,7 +355,7 @@ class _DropStep2OtpScreenState extends State<DropStep2OtpScreen> {
         OutlinedButton.icon(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
-          label: const Text('BACK'),
+          label: Text('BACK'),
         ),
       ],
     );

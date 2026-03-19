@@ -127,7 +127,7 @@ Future<void> _fetchAvailability() async {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: AppColors.background,
         body: Center(child: CircularProgressIndicator()),
       );
@@ -185,7 +185,7 @@ Future<void> _fetchAvailability() async {
         OutlinedButton.icon(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
-          label: const Text('BACK'),
+          label: Text('BACK'),
         ),
       ],
     );
@@ -399,7 +399,7 @@ Widget _noLockerAvailableView() {
               onPressed: courierPhone.length == 10
                   ? _findPartners
                   : null,
-              child: const Text(
+              child: Text(
   'Find Couriers',
   style: TextStyle(
     color: Colors.white,
@@ -590,7 +590,7 @@ if (courierError != null) ...[
       ),
     ),
     child: Row(
-      children: const [
+      children: [
         Icon(Icons.warning_amber_rounded,
             color: Colors.redAccent),
         SizedBox(width: 10),

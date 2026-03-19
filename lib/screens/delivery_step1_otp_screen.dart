@@ -145,7 +145,7 @@ class _DeliveryStep1OtpScreenState extends State<DeliveryStep1OtpScreen> {
             );
           },
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          label: const Text('BACK'),
+          label: Text('BACK'),
         ),
       ],
     );
@@ -294,7 +294,7 @@ class _DeliveryStep1OtpScreenState extends State<DeliveryStep1OtpScreen> {
                   _otp.length == otpLength && !_loading ? _verify : null,
               child: _loading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('VERIFY OTP'),
+                  : Text('VERIFY OTP'),
             ),
           ),
         ],

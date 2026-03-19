@@ -94,7 +94,7 @@ class _DeliveryStep2DashboardScreenAuthState
   @override
   Widget build(BuildContext context) {
     if (sizes == null) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: AppColors.background,
         body: Center(child: CircularProgressIndicator()),
       );
@@ -135,7 +135,7 @@ class _DeliveryStep2DashboardScreenAuthState
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('DELIVERY DROP.', style: AppText.titleXL),
+            Text('DELIVERY DROP.', style: AppText.titleXL),
             const SizedBox(height: 6),
             Text('FOR ${widget.recipientPhone}', style: AppText.muted),
           ],
@@ -152,7 +152,7 @@ class _DeliveryStep2DashboardScreenAuthState
             );
           },
           icon: const Icon(Icons.arrow_back),
-          label: const Text('BACK'),
+          label: Text('BACK'),
         ),
       ],
     );
@@ -206,9 +206,9 @@ class _DeliveryStep2DashboardScreenAuthState
     return _panel(
       title: 'COURIER SERVICES.',
       child: loadingCourier
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : couriers.isEmpty
-              ? const Center(
+              ? Center(
                   child: Text(
                     'NO COURIERS FOUND',
                     style: AppText.muted,

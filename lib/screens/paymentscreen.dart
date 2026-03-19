@@ -130,12 +130,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Payment Failed'),
+        title: Text('Payment Failed'),
         content: Text(msg),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: Text('OK'),
           )
         ],
       ),
@@ -150,7 +150,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       body: Center(
         child: _loading
             ? const CircularProgressIndicator()
-            : const Text(
+            : Text(
                 'Opening Payment Gateway...',
                 style: TextStyle(fontSize: 18),
               ),

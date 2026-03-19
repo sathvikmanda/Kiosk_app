@@ -100,13 +100,13 @@ class _StoreStep5LockerOpeningScreenState
                 color: AppColors.primary,
               ),
               const SizedBox(height: 28),
-              const Text(
+              Text(
                 'OPENING LOCKER',
                 style: AppText.titleL,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 14),
-              const Text(
+              Text(
                 'Please place your luggage\nand close the locker door.',
                 textAlign: TextAlign.center,
                 style: AppText.muted,

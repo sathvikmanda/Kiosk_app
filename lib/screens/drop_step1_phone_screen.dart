@@ -204,7 +204,7 @@ void initState() {
             Navigator.pop(context);
           },
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          label: const Text('BACK'),
+          label: Text('BACK'),
         ),
       ],
     );

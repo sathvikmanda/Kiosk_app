@@ -154,7 +154,7 @@ class _DropStep3DashboardScreenAuthState
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: AppColors.background,
         body: Center(child: CircularProgressIndicator()),
       );
@@ -216,7 +216,7 @@ class _DropStep3DashboardScreenAuthState
         OutlinedButton.icon(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
-          label: const Text('BACK'),
+          label: Text('BACK'),
         ),
       ],
     );
@@ -362,7 +362,7 @@ Widget _reservationPanel() {
     return _panel(
       title: 'COURIER SERVICES.',
       child: findingPartners
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : ListView.separated(
               itemCount: courierPartners.length,
               separatorBuilder: (_, __) =>

@@ -71,7 +71,7 @@ class _DeliveryStep3LockerOpeningScreenState
               ),
               const SizedBox(height: 28),
 
-              const Text(
+              Text(
                 'OPENING LOCKER',
                 style: AppText.titleL,
                 textAlign: TextAlign.center,
@@ -79,7 +79,7 @@ class _DeliveryStep3LockerOpeningScreenState
 
               const SizedBox(height: 14),
 
-              const Text(
+              Text(
                 'Please place the parcel inside\nand close the locker door.',
                 textAlign: TextAlign.center,
                 style: AppText.muted,

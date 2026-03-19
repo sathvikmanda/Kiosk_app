@@ -21,6 +21,7 @@ class _KioskCameraLayerState extends State<KioskCameraLayer>
   bool _scanLocked = false;
   bool _isActive = false;
   bool _subscribed = false;
+  bool _starting = false; // guard against concurrent starts
 
   @override
   void initState() {
@@ -67,22 +68,31 @@ class _KioskCameraLayerState extends State<KioskCameraLayer>
     _stopCamera();
   }
 
-  /// Coming back from another screen
+  /// Coming back from another screen (including popUntil)
+  /// Use a short delay so rapid consecutive didPopNext calls
+  /// (from popUntil) settle before we start the camera
   @override
   void didPopNext() {
-    _startCamera();
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) _startCamera();
+    });
   }
 
   // ================= CAMERA CONTROL =================
 
   void _startCamera() async {
-    if (_isActive) return;
+    // Already active or in the middle of starting — skip
+    if (_isActive || _starting) return;
+    _starting = true;
 
     try {
       await _controller.start();
       _isActive = true;
+      debugPrint("Camera started");
     } catch (e) {
       debugPrint("Camera start error: $e");
+    } finally {
+      _starting = false;
     }
   }
 
@@ -92,6 +102,7 @@ class _KioskCameraLayerState extends State<KioskCameraLayer>
     try {
       await _controller.stop();
       _isActive = false;
+      debugPrint("Camera stopped");
     } catch (e) {
       debugPrint("Camera stop error: $e");
     }
@@ -117,13 +128,10 @@ class _KioskCameraLayerState extends State<KioskCameraLayer>
             if (raw == null) return;
 
             _scanLocked = true;
-
             widget.onScan(raw);
 
             Future.delayed(const Duration(seconds: 2), () {
-              if (mounted) {
-                _scanLocked = false;
-              }
+              if (mounted) _scanLocked = false;
             });
           },
         ),

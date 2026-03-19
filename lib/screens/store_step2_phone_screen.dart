@@ -90,7 +90,7 @@ void initState() {
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             Text('STORING LUGGAGE.', style: AppText.titleXL),
             SizedBox(height: 6),
             Text(
@@ -102,7 +102,7 @@ void initState() {
         OutlinedButton.icon(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
-          label: const Text('BACK'),
+          label: Text('BACK'),
         ),
       ],
     );
@@ -120,7 +120,7 @@ void initState() {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'ENTER YOUR PHONE NUMBER.',
             style: AppText.titleL,
           ),
@@ -200,7 +200,7 @@ void initState() {
                   : null,
               child: isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('CONTINUE.'),
+                  : Text('CONTINUE.'),
             ),
           ),
         ],

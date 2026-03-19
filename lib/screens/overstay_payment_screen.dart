@@ -84,7 +84,7 @@ class _OverstayPaymentScreenState
       paying = true;
       error = null;
     });
-final int totalInPaise = widget.amount;
+final int totalInPaise = widget.amount ;
     try {
       final order =
           await ApiService.createRazorpayOrder(
@@ -333,7 +333,7 @@ Widget _overstaySummaryCard() {
                         ? const CircularProgressIndicator(
                             color:
                                 Colors.black)
-                        : const Text(
+                        : Text(
                             'PAY & UNLOCK',
                             style: TextStyle(
                               fontWeight:

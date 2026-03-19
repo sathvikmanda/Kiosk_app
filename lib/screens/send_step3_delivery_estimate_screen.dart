@@ -58,7 +58,7 @@ class _SendStep3DeliveryEstimateScreenState
 
   Future<void> _fetchAvailableSizes() async {
     try {
-      final sizes = await ApiService.getAvailableSizes('L01');
+      final sizes = await ApiService.getAvailableSizes('L00002');
 
       setState(() {
         availableSizes = sizes;
@@ -219,7 +219,7 @@ class _SendStep3DeliveryEstimateScreenState
             Navigator.pop(context);
           },
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          label: const Text('BACK'),
+          label: Text('BACK'),
         ),
       ],
     );
@@ -380,7 +380,7 @@ else ...[
                       );
                     }
                   : null,
-              child: const Text('CONTINUE'),
+              child: Text('CONTINUE'),
             ),
           ),
         ],
@@ -572,7 +572,7 @@ Widget _summaryRow(String label, String value, {bool isTotal = false}) {
         selectedCategory == 'cheapest' ? cheapestServices : fastestServices;
 
     if (services.isEmpty) {
-      return const Center(
+      return Center(
         child: Text('No services available', style: AppText.muted),
       );
     }

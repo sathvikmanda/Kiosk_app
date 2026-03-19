@@ -204,7 +204,7 @@ class _SendStep2OtpScreenState extends State<SendStep2OtpScreen> {
         OutlinedButton.icon(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
-          label: const Text('BACK'),
+          label: Text('BACK'),
         ),
       ],
     );
@@ -349,7 +349,7 @@ class _SendStep2OtpScreenState extends State<SendStep2OtpScreen> {
                       : null,
               child: _loading
                   ? const CircularProgressIndicator(color: Colors.black)
-                  : const Text('VERIFY OTP'),
+                  : Text('VERIFY OTP'),
             ),
           ),
         ],

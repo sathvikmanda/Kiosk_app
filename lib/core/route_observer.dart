@@ -14,7 +14,7 @@ class InactivityRouteObserver extends NavigatorObserver {
   final _controller = InactivityController();
   OverlayEntry? _overlayEntry;
   Timer? _countdownTimer;
-  int _countdown = 10;
+  int _countdown = 30;
 
   @override
   void didPush(Route route, Route? previousRoute) {
@@ -43,7 +43,7 @@ class InactivityRouteObserver extends NavigatorObserver {
 
   void _showWarning() {
     debugPrint('[Inactivity] _showWarning called');
-    _countdown = 10;
+    _countdown = 30;
     _overlayEntry?.remove();
     _overlayEntry = null;
 
@@ -74,7 +74,7 @@ class InactivityRouteObserver extends NavigatorObserver {
     _countdownTimer?.cancel();
     _overlayEntry?.remove();
     _overlayEntry = null;
-    _countdown = 10;
+    _countdown = 30;
   }
 
   void _onUserStay() {
@@ -168,7 +168,7 @@ class _InactivityWarningOverlayState extends State<_InactivityWarningOverlay>
 
   @override
   Widget build(BuildContext context) {
-    final progress = _countdown / 10.0;
+    final progress = _countdown / 30.0;
 
     return FadeTransition(
       opacity: _fadeAnim,
@@ -305,7 +305,7 @@ class _InactivityWarningOverlayState extends State<_InactivityWarningOverlay>
                           height: 64,
                           child: ElevatedButton(
                             onPressed: widget.onStay,
-                            child: const Text(
+                            child: Text(
                               "I'M HERE",
                               style: TextStyle(
                                 fontWeight: FontWeight.w900,

@@ -107,7 +107,7 @@ void initState() {
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             Text('VERIFY SELF.', style: AppText.titleXL),
             SizedBox(height: 6),
             Text('ENTER YOUR PHONE NUMBER', style: AppText.muted),
@@ -116,7 +116,7 @@ void initState() {
         OutlinedButton.icon(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
-          label: const Text('BACK'),
+          label: Text('BACK'),
         ),
       ],
     );
@@ -134,7 +134,7 @@ void initState() {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'ENTER YOUR PHONE NUMBER.',
             style: AppText.titleL,
           ),
@@ -208,7 +208,7 @@ void initState() {
             child: ElevatedButton(
               onPressed:
                   senderPhone.length == phoneLength ? _sendOtp : null,
-              child: const Text(
+              child: Text(
   'SEND OTP',
   style: TextStyle(
     color: Colors.white,

@@ -170,7 +170,7 @@ class _SendDeliveryEstimateAfterAddressScreenState
       style: OutlinedButton.styleFrom(
         side: const BorderSide(color: Colors.white, width: 1.5),
       ),
-      child: const Text(
+      child: Text(
         'BACK',
         style: TextStyle(color: Colors.white),
       ),
@@ -200,7 +200,7 @@ class _SendDeliveryEstimateAfterAddressScreenState
 
             Expanded(
               child: loading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? Center(child: CircularProgressIndicator())
                   : _serviceList(),
             ),
 
@@ -216,7 +216,7 @@ class _SendDeliveryEstimateAfterAddressScreenState
                         : () => _onContinue(toAddress),
                 child: lockingCourier
                     ? const CircularProgressIndicator(color: Colors.black)
-                    : const Text('CONTINUE'),
+                    : Text('CONTINUE'),
               ),
             ),
           ],
@@ -282,7 +282,7 @@ class _SendDeliveryEstimateAfterAddressScreenState
         selectedCategory == 'cheapest' ? cheapestServices : fastestServices;
 
     if (services.isEmpty) {
-      return const Center(
+      return Center(
         child: Text('No services available', style: AppText.muted),
       );
     }

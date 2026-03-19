@@ -487,7 +487,7 @@ static Future<Map<String, dynamic>> getDeliveryEstimate({
     Uri.parse('$baseUrl/estimate'),
     headers: {'Content-Type': 'application/json'},
     body: jsonEncode({
-      'pickupPincode': '500081', // 🔥 your locker pincode
+      'pickupPincode': '500032', // 🔥 your locker pincode
       'dropPincode': dropPincode,
       'weightKg': 1,
     }),

@@ -196,7 +196,7 @@ class _StoreStep3OtpScreenState extends State<StoreStep3OtpScreen> {
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             Text('STORING LUGGAGE.', style: AppText.titleXL),
             SizedBox(height: 6),
             Text('STEP 3 OF 4: VERIFY OTP', style: AppText.muted),
@@ -205,7 +205,7 @@ class _StoreStep3OtpScreenState extends State<StoreStep3OtpScreen> {
         OutlinedButton.icon(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
-          label: const Text('BACK'),
+          label: Text('BACK'),
         ),
       ],
     );
@@ -223,7 +223,7 @@ class _StoreStep3OtpScreenState extends State<StoreStep3OtpScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('ENTER OTP.', style: AppText.titleL),
+          Text('ENTER OTP.', style: AppText.titleL),
           const SizedBox(height: 12),
           Text(
             'OTP SENT TO ${widget.phoneNumber}',
@@ -359,7 +359,7 @@ class _StoreStep3OtpScreenState extends State<StoreStep3OtpScreen> {
                   : null,
               child: isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('VERIFY OTP'),
+                  : Text('VERIFY OTP'),
             ),
           ),
         ],

@@ -93,7 +93,7 @@ class _DeliveryStep1RecipientPhoneScreenState
             );
           },
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          label: const Text('BACK'),
+          label: Text('BACK'),
         ),
       ],
     );
@@ -156,7 +156,7 @@ class _DeliveryStep1RecipientPhoneScreenState
             height: 68,
             child: ElevatedButton(
               onPressed: phone.length == phoneLength ? _sendOtp : null,
-              child: const Text('SEND OTP'),
+              child: Text('SEND OTP'),
             ),
           ),
         ],

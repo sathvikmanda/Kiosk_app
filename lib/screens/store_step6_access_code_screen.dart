@@ -80,7 +80,7 @@ class _StoreStep6AccessCodeScreenState
               mainAxisSize: MainAxisSize.min,
               children: [
                 // ---------- TITLE ----------
-                const Text(
+                Text(
                   'YOUR ACCESS CODE',
                   style: AppText.muted,
                 ),
@@ -109,7 +109,7 @@ class _StoreStep6AccessCodeScreenState
 
                 const SizedBox(height: 28),
 
-                const Text(
+                Text(
                   'USE THIS CODE TO OPEN YOUR LOCKER',
                   style: AppText.muted,
                 ),
@@ -117,7 +117,7 @@ class _StoreStep6AccessCodeScreenState
                 const SizedBox(height: 36),
 
                 // ---------- PHONE CONFIRMATION ----------
-                const Text(
+                Text(
                   'DETAILS SENT TO',
                   style: AppText.caption,
                 ),
@@ -129,7 +129,7 @@ class _StoreStep6AccessCodeScreenState
 
                 const SizedBox(height: 40),
 
-                const Text(
+                Text(
                   'Tap anywhere to return home',
                   style: AppText.caption,
                 ),

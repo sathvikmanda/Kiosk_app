@@ -192,7 +192,7 @@ class _DeliverySelfAuthOtpScreenState
             );
           },
           icon: const Icon(Icons.arrow_back),
-          label: const Text('BACK'),
+          label: Text('BACK'),
         ),
       ],
     );
@@ -309,7 +309,7 @@ class _DeliverySelfAuthOtpScreenState
                 foregroundColor: Colors.black,
               ),
               onPressed: _otp.length == otpLength ? _verify : null,
-              child: const Text('VERIFY OTP'),
+              child: Text('VERIFY OTP'),
             ),
           ),
         ],

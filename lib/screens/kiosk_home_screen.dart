@@ -76,12 +76,10 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
       setState(() => _showInactivityWarning = false);
     };
 
-    inactivity.onSoftReset = () {
-      if (!mounted) return;
-      _softReset();
-    };
+    // onSoftReset is NOT set here — owned by InactivityRouteObserver
+    // which sets it to _resetToHome when user navigates into a child screen
 
-    //inactivity.userInteracted();
+    inactivity.userInteracted();
     KioskController.enable();
     //_lockerState.start();
   }
@@ -376,7 +374,7 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
             // Balance slider
             Row(
               children: [
-                const Text('🔈 L', style: TextStyle(color: Colors.white54, fontSize: 13)),
+                Text('🔈 L', style: TextStyle(color: Colors.white54, fontSize: 13)),
                 Expanded(
                   child: Slider(
                     value: _testBalance,
@@ -388,7 +386,7 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
                     onChanged: (val) => setState(() => _testBalance = val),
                   ),
                 ),
-                const Text('R 🔉', style: TextStyle(color: Colors.white54, fontSize: 13)),
+                Text('R 🔉', style: TextStyle(color: Colors.white54, fontSize: 13)),
               ],
             ),
 
@@ -514,33 +512,8 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
             Expanded(
               child: Column(
                 children: [
-                  Expanded(
-                    child: _actionButton(
-                      icon: Icons.local_shipping_rounded,
-                      title: 'Send',
-                      subtitle: 'Courier pickup from locker',
-                      onTap: () async {
-                        if (_recordingStartInProgress) return;
-                        _recordingStartInProgress = true;
-                        try {
-                          ApiService.trackLockerClick(service: 'send');
-                          final helpId = await ApiService.startComplaintIfNeeded();
-                          if (helpId == null) return;
-                          InactivityController().activeHelpId = helpId;
-                          if (!mounted) return;
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const SendStep3DeliveryEstimateScreen(),
-                            ),
-                          );
-                        } finally {
-                          if (mounted) setState(() => _recordingStartInProgress = false);
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 24),
+                  
+                  
                   Expanded(
                     child: _actionButton(
                       icon: Icons.move_to_inbox_outlined,
@@ -589,6 +562,33 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
                             context,
                             MaterialPageRoute(
                               builder: (_) => StoreStep1Screen(helpId: helpId),
+                            ),
+                          );
+                        } finally {
+                          if (mounted) setState(() => _recordingStartInProgress = false);
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Expanded(
+                    child: _actionButton(
+                      icon: Icons.local_shipping_rounded,
+                      title: 'Send',
+                      subtitle: 'Courier pickup from locker',
+                      onTap: () async {
+                        if (_recordingStartInProgress) return;
+                        _recordingStartInProgress = true;
+                        try {
+                          ApiService.trackLockerClick(service: 'send');
+                          final helpId = await ApiService.startComplaintIfNeeded();
+                          if (helpId == null) return;
+                          InactivityController().activeHelpId = helpId;
+                          if (!mounted) return;
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const SendStep3DeliveryEstimateScreen(),
                             ),
                           );
                         } finally {
@@ -648,7 +648,7 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                       child: Row(
-                        children: const [
+                        children: [
                           Icon(Icons.help_outline, color: AppColors.card, size: 20),
                           SizedBox(width: 8),
                           Text(
@@ -720,7 +720,7 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
                   onPressed: (_code.length == codeLength && !_loading) ? _submitCode : null,
                   child: _loading
                       ? const CircularProgressIndicator(color: Colors.black)
-                      : const Text(
+                      : Text(
                           'SUBMIT',
                           style: TextStyle(fontWeight: FontWeight.w900, fontSize: 22),
                         ),

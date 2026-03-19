@@ -111,7 +111,7 @@ class _DeliveryStep2DashboardScreenState
   @override
   Widget build(BuildContext context) {
     if (loadingSizes) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: AppColors.background,
         body: Center(child: CircularProgressIndicator()),
       );
@@ -157,7 +157,7 @@ class _DeliveryStep2DashboardScreenState
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('DELIVERY DROP.', style: AppText.titleXL),
+            Text('DELIVERY DROP.', style: AppText.titleXL),
             const SizedBox(height: 6),
             Text('FOR ${widget.recipientPhone}', style: AppText.muted),
           ],
@@ -165,7 +165,7 @@ class _DeliveryStep2DashboardScreenState
         OutlinedButton.icon(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
-          label: const Text('BACK'),
+          label: Text('BACK'),
         ),
       ],
     );
@@ -241,7 +241,7 @@ class _DeliveryStep2DashboardScreenState
             child: ElevatedButton(
               onPressed:
                   agentPhone.length == 10 ? _findPartners : null,
-              child: const Text('FIND COURIERS'),
+              child: Text('FIND COURIERS'),
             ),
           ),
         ],
@@ -255,7 +255,7 @@ class _DeliveryStep2DashboardScreenState
     return _panel(
       title: 'COURIER SERVICES.',
       child: loadingPartners
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : ListView.separated(
               itemCount: partners.length,
               separatorBuilder: (_, __) =>

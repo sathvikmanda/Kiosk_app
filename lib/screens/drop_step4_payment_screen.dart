@@ -110,7 +110,7 @@ class _DropStep4PaymentScreenState
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             Text('DROP PARCEL.', style: AppText.titleXL),
             SizedBox(height: 6),
             Text(
@@ -121,7 +121,7 @@ class _DropStep4PaymentScreenState
         ),
         OutlinedButton.icon(
           icon: const Icon(Icons.arrow_back),
-          label: const Text('BACK'),
+          label: Text('BACK'),
           onPressed: () => Navigator.pop(context),
         ),
       ],

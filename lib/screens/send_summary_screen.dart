@@ -152,7 +152,7 @@ Future<void> _payAndContinue() async {
                       width: 1.5,
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'BACK',
                     style: TextStyle(color: Colors.white),
                   ),
@@ -185,7 +185,7 @@ Future<void> _payAndContinue() async {
                 onPressed: paying ? null : _payAndContinue,
                 child: paying
                     ? const CircularProgressIndicator(color: Colors.black)
-                    : const Text('PAY & CONTINUE'),
+                    : Text('PAY & CONTINUE'),
               ),
             ),
           ],

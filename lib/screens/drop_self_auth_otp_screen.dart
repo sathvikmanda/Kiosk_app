@@ -187,7 +187,7 @@ class _DropSelfAuthOtpScreenState
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             Text('VERIFY OTP.', style: AppText.titleXL),
             SizedBox(height: 6),
             Text('SELF AUTHENTICATION', style: AppText.muted),
@@ -196,7 +196,7 @@ class _DropSelfAuthOtpScreenState
         OutlinedButton.icon(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
-          label: const Text('BACK'),
+          label: Text('BACK'),
         ),
       ],
     );
@@ -214,7 +214,7 @@ class _DropSelfAuthOtpScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('ENTER OTP.', style: AppText.titleL),
+          Text('ENTER OTP.', style: AppText.titleL),
           const SizedBox(height: 8),
           Text(
             'Sent to +91 ${widget.senderPhone}',
@@ -323,7 +323,7 @@ class _DropSelfAuthOtpScreenState
             child: ElevatedButton(
               onPressed:
                   _otp.length == otpLength ? _verifyOtp : null,
-              child: const Text(
+              child: Text(
   'VERIFY OTP',
   style: TextStyle(
     color: Colors.white,

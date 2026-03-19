@@ -73,7 +73,7 @@ class _SendStep2LinkSentScreenState extends State<SendStep2LinkSentScreen> {
             children: [
               const Icon(Icons.check_circle, size: 96, color: Colors.green),
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 'LINK SENT',
                 style: TextStyle(
                   fontSize: 32,
@@ -82,7 +82,7 @@ class _SendStep2LinkSentScreenState extends State<SendStep2LinkSentScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'A secure link has been sent to',
                 style: TextStyle(color: Colors.white60),
               ),
@@ -96,13 +96,13 @@ class _SendStep2LinkSentScreenState extends State<SendStep2LinkSentScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 'Please continue on WhatsApp\n to complete your drop.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.white70, height: 1.4),
               ),
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 'TAP ANYWHERE TO RETURN HOME',
                 style: TextStyle(color: Colors.white38),
               ),

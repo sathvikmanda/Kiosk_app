@@ -103,7 +103,7 @@ void initState() {
         OutlinedButton.icon(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
-          label: const Text('BACK'),
+          label: Text('BACK'),
         ),
       ],
     );
@@ -178,7 +178,7 @@ void initState() {
               ),
               onPressed:
                   senderPhone.length == phoneLength ? _sendOtp : null,
-              child: const Text('SEND OTP'),
+              child: Text('SEND OTP'),
             ),
           ),
         ],

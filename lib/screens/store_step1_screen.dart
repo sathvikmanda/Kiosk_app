@@ -159,7 +159,7 @@ class _StoreStep1ScreenState extends State<StoreStep1Screen> {
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             Text('STORING LUGGAGE.', style: AppText.titleXL),
             SizedBox(height: 6),
             Text(
@@ -174,7 +174,7 @@ class _StoreStep1ScreenState extends State<StoreStep1Screen> {
             Navigator.pop(context);
           },
           icon: const Icon(Icons.arrow_back),
-          label: const Text('CANCEL'),
+          label: Text('CANCEL'),
         ),
       ],
     );
@@ -320,7 +320,7 @@ class _StoreStep1ScreenState extends State<StoreStep1Screen> {
                       );
                     }
                   : null,
-              child: const Text('CONTINUE.'),
+              child: Text('CONTINUE.'),
             ),
           ),
         ],

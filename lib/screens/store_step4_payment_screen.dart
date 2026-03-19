@@ -221,7 +221,7 @@ Future<void> _onPaymentSuccess(PaymentSuccessResponse res) async {
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             Text('STORING LUGGAGE.', style: AppText.titleXL),
             SizedBox(height: 6),
             Text(
@@ -232,7 +232,7 @@ Future<void> _onPaymentSuccess(PaymentSuccessResponse res) async {
         ),
         OutlinedButton.icon(
           icon: const Icon(Icons.arrow_back),
-          label: const Text('BACK'),
+          label: Text('BACK'),
           onPressed: () {
             Navigator.pushReplacement(
               context,
@@ -281,7 +281,7 @@ Future<void> _onPaymentSuccess(PaymentSuccessResponse res) async {
               child: isLoading
                   ? const CircularProgressIndicator(
                       color: Colors.white)
-                  : const Text('PAY & CONTINUE'),
+                  : Text('PAY & CONTINUE'),
             ),
           ),
         ],

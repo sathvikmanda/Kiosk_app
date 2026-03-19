@@ -82,7 +82,7 @@ class _SendProcessingOrderScreenState
                   setState(() => failed = false);
                   _processOrder();
                 },
-                child: const Text('RETRY'),
+                child: Text('RETRY'),
               ),
             ],
           ],

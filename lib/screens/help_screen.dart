@@ -38,7 +38,7 @@ class HelpScreen extends StatelessWidget {
                         vertical: 16,
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       "CLOSE",
                       style: TextStyle(
                         fontWeight: FontWeight.w900,
@@ -69,7 +69,7 @@ class HelpScreen extends StatelessWidget {
 
               Center(
                 child: Text(
-                  "Support: +91 90000 00000",
+                  "Support: +91 8885536555",
                   style: AppText.titleL.copyWith(
                     color: AppColors.primary,
                     letterSpacing: 1.5,
