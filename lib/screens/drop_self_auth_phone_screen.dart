@@ -162,7 +162,7 @@ void initState() {
         color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: filled ? AppColors.primary : Colors.white12,
+          color: filled ? AppColors.primary : AppColors.subtle,
           width: 1.4,
         ),
       ),
@@ -170,7 +170,7 @@ void initState() {
         filled ? _digits[i] : '•',
         style: AppText.titleL.copyWith(
           fontSize: 22,
-          color: filled ? AppColors.primary : Colors.white38,
+          color: filled ? AppColors.primary : AppColors.placeholder,
         ),
       ),
     );
@@ -211,7 +211,7 @@ void initState() {
               child: Text(
   'SEND OTP',
   style: TextStyle(
-    color: Colors.white,
+    color: AppColors.onSurface,
     fontWeight: FontWeight.w900,
     fontSize: 30,
     letterSpacing: 1.1,
@@ -242,7 +242,7 @@ void initState() {
   fontSize: isNumber ? 34 : 20,
   fontWeight: isNumber ? FontWeight.w900 : FontWeight.w600,
   color: label == 'Clear'
-      ? Colors.white70
+      ? AppColors.inactive
       : AppColors.primary,
 ),
 

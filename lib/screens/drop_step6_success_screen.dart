@@ -4,6 +4,14 @@ import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
 import '../core/app_text.dart';
 
+// Mask middle digits: 123456 → 12xxx56
+String _maskCode(String code) {
+  if (code.length < 6) return code;
+  final start = code.substring(0, code.length - 5);
+  final end = code.substring(code.length - 2);
+  return '${start}xxx$end';
+}
+
 class DropStep6SuccessScreen extends StatefulWidget {
   const DropStep6SuccessScreen({
     super.key,
@@ -66,7 +74,7 @@ class _DropStep6SuccessScreenState extends State<DropStep6SuccessScreen> {
               const SizedBox(height: 10),
 
               Text(
-                widget.accessCode,
+                _maskCode(widget.accessCode),
                 style: AppText.code.copyWith(
                   color: AppColors.primary,
                 ),
@@ -75,7 +83,7 @@ class _DropStep6SuccessScreenState extends State<DropStep6SuccessScreen> {
               const SizedBox(height: 24),
 
               Text(
-                'Sent to +91 ${widget.phoneNumber}',
+                'Sent to receiver +91 ${widget.phoneNumber}',
                 style: AppText.muted,
               ),
 

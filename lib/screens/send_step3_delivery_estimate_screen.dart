@@ -205,7 +205,7 @@ class _SendStep3DeliveryEstimateScreenState
             const SizedBox(height: 6),
             Text(
               'Prices shown are estimates. Final price will be confirmed after address selection.',
-              style: AppText.body.copyWith(color: Colors.white70),
+              style: AppText.body.copyWith(color: AppColors.inactive),
             ),
           ],
         ),
@@ -218,7 +218,7 @@ class _SendStep3DeliveryEstimateScreenState
             }
             Navigator.pop(context);
           },
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
           label: Text('BACK'),
         ),
       ],
@@ -329,7 +329,7 @@ else ...[
               decoration: BoxDecoration(
                 color: AppColors.card,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white12),
+                border: Border.all(color: AppColors.subtle),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -471,7 +471,7 @@ Widget _summaryRow(String label, String value, {bool isTotal = false}) {
             border: Border.all(
               color: selected && isAvailable
                   ? AppColors.primary
-                  : Colors.white12,
+                  : AppColors.subtle,
               width: 2,
             ),
           ),
@@ -558,7 +558,7 @@ Widget _summaryRow(String label, String value, {bool isTotal = false}) {
               : AppColors.card,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: selected ? AppColors.primary : Colors.white12,
+            color: selected ? AppColors.primary : AppColors.subtle,
             width: 2,
           ),
         ),
@@ -598,7 +598,7 @@ Widget _summaryRow(String label, String value, {bool isTotal = false}) {
                     : AppColors.card,
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: selected ? AppColors.primary : Colors.white12,
+                  color: selected ? AppColors.primary : AppColors.subtle,
                   width: 2,
                 ),
               ),

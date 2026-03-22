@@ -382,7 +382,7 @@ class _StoreStep1ScreenState extends State<StoreStep1Screen> {
             border: Border.all(
               color: selected
                   ? AppColors.primary
-                  : Colors.white12,
+                  : AppColors.subtle,
               width: 2,
             ),
             borderRadius: BorderRadius.circular(18),

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'kiosk_controller.dart';
 import 'core/theme_notifier.dart';
 import 'main.dart';
@@ -20,7 +21,6 @@ class _HiddenAdminUnlockState extends State<HiddenAdminUnlock> {
     tapCount++;
     resetTimer?.cancel();
     resetTimer = Timer(const Duration(seconds: 2), () => tapCount = 0);
-
     if (tapCount >= 5) {
       tapCount = 0;
       _showAdminDialog();
@@ -69,11 +69,18 @@ class _AdminPinDialogState extends State<_AdminPinDialog> {
   bool _kioskEnabled = true;
   final _themeNotifier = ThemeNotifier();
 
+  static const _platform = MethodChannel('kiosk_channel');
+
+  Future<void> _launchApp(String package) async {
+    try {
+      await _platform.invokeMethod('launchApp', {'package': package});
+    } catch (_) {}
+  }
+
   void _toggleTheme(bool isDark) {
     _themeNotifier.setDark(isDark);
     setState(() {});
-    // Pop all screens back to home so full stack rebuilds with new colors
-    Navigator.pop(context); // close dialog first
+    Navigator.pop(context);
     navigatorKey.currentState?.popUntil((route) => route.isFirst);
   }
 
@@ -81,7 +88,7 @@ class _AdminPinDialogState extends State<_AdminPinDialog> {
   Widget build(BuildContext context) {
     if (_unlocked) {
       return AlertDialog(
-        title: Text("Admin Panel"),
+        title: const Text("Admin Panel"),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -114,9 +121,7 @@ class _AdminPinDialogState extends State<_AdminPinDialog> {
                 _themeNotifier.isDark ? Icons.dark_mode : Icons.light_mode,
                 color: _themeNotifier.isDark ? Colors.indigo : Colors.amber,
               ),
-              title: Text(
-                _themeNotifier.isDark ? "Theme: Dark" : "Theme: Light",
-              ),
+              title: Text(_themeNotifier.isDark ? "Theme: Dark" : "Theme: Light"),
               trailing: Switch(
                 value: _themeNotifier.isDark,
                 activeColor: Colors.indigo,
@@ -125,12 +130,39 @@ class _AdminPinDialogState extends State<_AdminPinDialog> {
                 onChanged: _toggleTheme,
               ),
             ),
+
+            const Divider(),
+
+            // ── Quick Launch ──
+            const Text("Quick Launch", style: TextStyle(fontSize: 12, color: Colors.grey)),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.terminal, size: 18),
+                  label: const Text("Termux"),
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await _launchApp("com.termux");
+                  },
+                ),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.settings, size: 18),
+                  label: const Text("Settings"),
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await _launchApp("com.android.settings");
+                  },
+                ),
+              ],
+            ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text("Close"),
+            child: const Text("Close"),
           ),
         ],
       );
@@ -138,7 +170,7 @@ class _AdminPinDialogState extends State<_AdminPinDialog> {
 
     // ── PIN entry ──
     return AlertDialog(
-      title: Text("Admin Access"),
+      title: const Text("Admin Access"),
       content: TextField(
         controller: _pinController,
         obscureText: true,
@@ -148,7 +180,7 @@ class _AdminPinDialogState extends State<_AdminPinDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text("Cancel"),
+          child: const Text("Cancel"),
         ),
         ElevatedButton(
           onPressed: () {
@@ -156,7 +188,7 @@ class _AdminPinDialogState extends State<_AdminPinDialog> {
               setState(() => _unlocked = true);
             }
           },
-          child: Text("Unlock"),
+          child: const Text("Unlock"),
         ),
       ],
     );

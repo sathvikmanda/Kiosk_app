@@ -64,11 +64,11 @@ class _SendAddressDashboardScreenState
     Navigator.pop(context);
   },
   style: OutlinedButton.styleFrom(
-    side: const BorderSide(color: Colors.white, width: 1.5),
+    side: BorderSide(color: AppColors.onSurface, width: 1.5),
   ),
   child: Text(
     'BACK',
-    style: TextStyle(color: Colors.white),
+    style: TextStyle(color: AppColors.onSurface),
   ),
 ),
 
@@ -145,7 +145,7 @@ class _SendAddressDashboardScreenState
         Icon(
           Icons.location_off,
           size: 64,
-          color: Colors.white38,
+          color: AppColors.placeholder,
         ),
         const SizedBox(height: 20),
         Text(
@@ -155,7 +155,7 @@ class _SendAddressDashboardScreenState
         const SizedBox(height: 8),
         Text(
           'Add a new address to continue',
-          style: AppText.body.copyWith(color: Colors.white60),
+          style: AppText.body.copyWith(color: AppColors.onSurfaceMuted),
         ),
         const SizedBox(height: 32),
         _addNewAddressCard(),
@@ -179,7 +179,7 @@ class _SendAddressDashboardScreenState
               : AppColors.card,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? AppColors.primary : Colors.white12,
+            color: selected ? AppColors.primary : AppColors.subtle,
             width: 2,
           ),
         ),
@@ -196,7 +196,7 @@ class _SendAddressDashboardScreenState
                   Text(
                     '  •  ${r['receiverPhone']}',
                     style: AppText.body.copyWith(
-                      color: Colors.white60,
+                      color: AppColors.onSurfaceMuted,
                       fontSize: 13,
                     ),
                   ),
@@ -207,7 +207,7 @@ class _SendAddressDashboardScreenState
               '${r['delivery_address']}, '
               '${r['delivery_city']} '
               '${r['delivery_pincode']}',
-              style: AppText.body.copyWith(color: Colors.white70),
+              style: AppText.body.copyWith(color: AppColors.inactive),
             ),
           ],
         ),
@@ -247,7 +247,7 @@ class _SendAddressDashboardScreenState
                 'A link will be sent to your WhatsApp to add a new address',
                 style: AppText.body.copyWith(
                   fontSize: 13,
-                  color: Colors.white60,
+                  color: AppColors.onSurfaceMuted,
                 ),
               ),
             ),
@@ -273,7 +273,7 @@ class _SendAddressDashboardScreenState
           const SizedBox(height: 12),
           Text(
             'Select an address to view delivery estimates.',
-            style: AppText.body.copyWith(color: Colors.white70),
+            style: AppText.body.copyWith(color: AppColors.inactive),
           ),
 
           const Spacer(),

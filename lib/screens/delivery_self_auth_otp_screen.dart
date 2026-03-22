@@ -33,6 +33,10 @@ class _DeliverySelfAuthOtpScreenState
   int _secondsLeft = _resendDuration;
   Timer? _timer;
 
+  // WhatsApp timer: starts at 0 (active immediately), counts after first send
+  int _waSecondsLeft = 0;
+  Timer? _waTimer;
+
   @override
   void initState() {
     super.initState();
@@ -45,19 +49,34 @@ class _DeliverySelfAuthOtpScreenState
   @override
   void dispose() {
     _timer?.cancel();
+    _waTimer?.cancel();
     super.dispose();
   }
 
   void _startTimer() {
     _timer?.cancel();
     setState(() => _secondsLeft = _resendDuration);
-
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) return t.cancel();
       if (_secondsLeft <= 1) {
         t.cancel();
         setState(() => _secondsLeft = 0);
       } else {
         setState(() => _secondsLeft--);
+      }
+    });
+  }
+
+  void _startWaTimer() {
+    _waTimer?.cancel();
+    setState(() => _waSecondsLeft = _resendDuration);
+    _waTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) return t.cancel();
+      if (_waSecondsLeft <= 1) {
+        t.cancel();
+        setState(() => _waSecondsLeft = 0);
+      } else {
+        setState(() => _waSecondsLeft--);
       }
     });
   }
@@ -122,18 +141,18 @@ class _DeliverySelfAuthOtpScreenState
   }
 
   Future<void> _resendOtpWhatsapp() async {
+    if (_waSecondsLeft > 0) return;
     try {
-      await ApiService.resendOtpWhatsapp(
-        phone: widget.senderPhone,
-      );
+      await ApiService.resendOtpWhatsapp(phone: widget.senderPhone);
+      _startWaTimer();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('OTP sent on WhatsApp')),
       );
     } catch (_) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to resend OTP on WhatsApp'),
-        ),
+        const SnackBar(content: Text('Failed to resend OTP on WhatsApp')),
       );
     }
   }
@@ -250,7 +269,7 @@ class _DeliverySelfAuthOtpScreenState
             width: double.infinity,
             height: 56,
             child: OutlinedButton(
-              onPressed: _resendOtpWhatsapp,
+              onPressed: _waSecondsLeft == 0 ? _resendOtpWhatsapp : null,
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: AppColors.primary, width: 3),
                 shape: RoundedRectangleBorder(
@@ -258,9 +277,11 @@ class _DeliverySelfAuthOtpScreenState
                 ),
               ),
               child: Text(
-                'RESEND OTP ON WHATSAPP',
+                _waSecondsLeft > 0
+                    ? 'WHATSAPP OTP IN ${_waSecondsLeft}s'
+                    : 'RESEND OTP ON WHATSAPP',
                 style: AppText.titleM.copyWith(
-                  color: AppColors.primary,
+                  color: _waSecondsLeft == 0 ? AppColors.primary : AppColors.placeholder,
                   letterSpacing: 1.2,
                   fontWeight: FontWeight.w700,
                 ),
@@ -305,7 +326,7 @@ class _DeliverySelfAuthOtpScreenState
               style: ElevatedButton.styleFrom(
                 backgroundColor: _otp.length == otpLength
                     ? AppColors.primary
-                    : Colors.grey.shade800,
+                    : AppColors.card,
                 foregroundColor: Colors.black,
               ),
               onPressed: _otp.length == otpLength ? _verify : null,
@@ -330,7 +351,7 @@ class _DeliverySelfAuthOtpScreenState
         color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: filled ? AppColors.primary : Colors.white12,
+          color: filled ? AppColors.primary : AppColors.subtle,
           width: 1.4,
         ),
       ),
@@ -338,7 +359,7 @@ class _DeliverySelfAuthOtpScreenState
         filled ? _otp[i] : '•',
         style: AppText.titleL.copyWith(
           fontSize: 22,
-          color: filled ? AppColors.primary : Colors.white38,
+          color: filled ? AppColors.primary : AppColors.placeholder,
         ),
       ),
     );
@@ -360,7 +381,7 @@ class _DeliverySelfAuthOtpScreenState
             style: AppText.titleL.copyWith(
               fontSize: isNumber ? 32 : 20,
               color: v == 'Clear'
-                  ? Colors.white70
+                  ? AppColors.inactive
                   : AppColors.primary,
             ),
           ),

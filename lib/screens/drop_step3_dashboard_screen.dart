@@ -319,7 +319,7 @@ Widget _noLockerAvailableView() {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: navy,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.onPrimary,
                 elevation: 3,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(18),
@@ -329,7 +329,7 @@ Widget _noLockerAvailableView() {
               label: Text(
                 'DROP AS COURIER',
                 style: AppText.titleM.copyWith(
-                  color: Colors.white,
+                  color: AppColors.onSurface,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 1.0,
                 ),
@@ -402,7 +402,7 @@ Widget _noLockerAvailableView() {
               child: Text(
   'Find Couriers',
   style: TextStyle(
-    color: Colors.white,
+    color: AppColors.onSurface,
     fontWeight: FontWeight.w900,
     fontSize: 20,
     letterSpacing: 1.1,
@@ -658,7 +658,7 @@ onPressed: () async {
               child: Text(
                 'UNLOCK LOCKER',
                 style: AppText.titleM.copyWith(
-                  color: Colors.white,
+                  color: AppColors.onSurface,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.2,
                 ),
@@ -748,7 +748,7 @@ Widget _summaryPanel(BuildContext context) {
             child: Text(
               'CONTINUE',
               style: AppText.titleM.copyWith(
-                color: Colors.white,
+                color: AppColors.onSurface,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 1.0,
               ),
@@ -816,7 +816,7 @@ Widget _summaryPanel(BuildContext context) {
             border: Border.all(
               color: selected
                   ? AppColors.primary
-                  : Colors.white12,
+                  : AppColors.subtle,
               width: 2,
             ),
             borderRadius: BorderRadius.circular(18),

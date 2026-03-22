@@ -9,8 +9,7 @@
         android:label="kiosk"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:enableOnBackInvokedCallback="true"
-        android:testOnly="true">
+        android:enableOnBackInvokedCallback="true">
         
 
 <receiver

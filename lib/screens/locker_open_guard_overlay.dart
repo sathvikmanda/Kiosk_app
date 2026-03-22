@@ -23,7 +23,7 @@ class LockerOpenGuardOverlay extends StatelessWidget {
               Text(
                 'LOCKER OPEN',
                 style: AppText.titleXL.copyWith(
-                  color: Colors.white,
+                  color: AppColors.onSurface,
                   letterSpacing: 2,
                 ),
               ),
@@ -31,7 +31,7 @@ class LockerOpenGuardOverlay extends StatelessWidget {
               Text(
                 'Please close the locker to continue',
                 style: AppText.muted.copyWith(
-                  color: Colors.white70,
+                  color: AppColors.inactive,
                   fontSize: 26,
                 ),
               ),

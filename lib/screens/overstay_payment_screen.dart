@@ -58,6 +58,7 @@ class _OverstayPaymentScreenState
     extends State<OverstayPaymentScreen> {
   late Razorpay _razorpay;
   bool paying = false;
+  bool _paymentLaunched = false;
   String? error;
 
   @override
@@ -80,6 +81,8 @@ class _OverstayPaymentScreenState
   // PAYMENT INIT
   // ===============================
   Future<void> _startPayment() async {
+    if (_paymentLaunched) return;
+    _paymentLaunched = true;
     setState(() {
       paying = true;
       error = null;
@@ -155,6 +158,7 @@ final int totalInPaise = widget.amount ;
   void _onPaymentError(
       PaymentFailureResponse res) {
     InactivityController().resumeAfterPayment();
+    _paymentLaunched = false;
     setState(() {
       paying = false;
       error = 'Payment failed or cancelled';
@@ -230,7 +234,7 @@ Widget _overstaySummaryCard() {
         _row('Locker Size', size),
 
         const SizedBox(height: 20),
-        const Divider(color: Colors.white12),
+        Divider(color: AppColors.subtle),
 
         // TIME DETAILS
         const SizedBox(height: 20),
@@ -243,7 +247,7 @@ Widget _overstaySummaryCard() {
             formatDateTime(now)),
 
         const SizedBox(height: 20),
-        const Divider(color: Colors.white12),
+        Divider(color: AppColors.subtle),
 
         // BILLING DETAILS
         const SizedBox(height: 20),
@@ -287,7 +291,7 @@ Widget _overstaySummaryCard() {
                   textAlign: TextAlign.center,
                   style: AppText.body.copyWith(
                       color:
-                          Colors.white70),
+                          AppColors.inactive),
                 ),
                 const SizedBox(height: 20),
 
@@ -328,7 +332,7 @@ Widget _overstaySummaryCard() {
                   height: 64,
                   child: ElevatedButton(
                     onPressed:
-                        paying ? null : _startPayment,
+                        (paying || _paymentLaunched) ? null : _startPayment,
                     child: paying
                         ? const CircularProgressIndicator(
                             color:
@@ -377,14 +381,14 @@ Widget _overstaySummaryCard() {
                   borderRadius:
                       BorderRadius.circular(14),
                   border: Border.all(
-                    color: Colors.white,
+                    color: AppColors.onSurface,
                     width: 2,
                   ),
                 ),
                 child: Text(
                   'BACK',
                   style: AppText.body.copyWith(
-                    color: Colors.white,
+                    color: AppColors.onSurface,
                     fontWeight:
                         FontWeight.w800,
                     letterSpacing: 1.2,

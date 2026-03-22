@@ -12,11 +12,13 @@ class DropStep5LockerOpeningScreen extends StatefulWidget {
     required this.phoneNumber,
     required this.accessCode,
     required this.helpId,
+    this.recipientPhone,
   });
-final String helpId;
+  final String helpId;
 
   final String phoneNumber;
   final String accessCode;
+  final String? recipientPhone;
 
   @override
   State<DropStep5LockerOpeningScreen> createState() =>
@@ -35,7 +37,7 @@ class _DropStep5LockerOpeningScreenState
         context,
         MaterialPageRoute(
           builder: (_) => DropStep6SuccessScreen(
-            phoneNumber: widget.phoneNumber,
+            phoneNumber: widget.recipientPhone ?? widget.phoneNumber,
             accessCode: widget.accessCode,
             helpId: widget.helpId,
           ),

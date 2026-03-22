@@ -66,6 +66,7 @@ class _DropStep4PaymentScreenState
         MaterialPageRoute(
           builder: (_) => DropStep5LockerOpeningScreen(
             phoneNumber: widget.phone,
+            recipientPhone: widget.phone,
             accessCode: accessCode,
             helpId: widget.helpId,
           ),
@@ -155,7 +156,7 @@ _row('TOTAL', '₹$total', highlight: true),
             decoration: BoxDecoration(
               color: AppColors.card,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white12),
+              border: Border.all(color: AppColors.subtle),
             ),
             child: Row(
               children: [
@@ -184,9 +185,7 @@ _row('TOTAL', '₹$total', highlight: true),
             child: ElevatedButton(
               onPressed: isLoading ? null : _unlockLocker,
               child: isLoading
-                  ? const CircularProgressIndicator(
-                      color: Colors.white,
-                    )
+                  ? CircularProgressIndicator(color: AppColors.onSurface)
                   : Text(
                       'UNLOCK LOCKER',
                       style: AppText.titleM.copyWith(
@@ -211,7 +210,7 @@ Widget _row(String label, String value, {bool highlight = false}) {
           style: AppText.body.copyWith(
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            color: Colors.white70,
+            color: AppColors.inactive,
           ),
         ),
         Text(
@@ -221,7 +220,7 @@ Widget _row(String label, String value, {bool highlight = false}) {
             fontWeight: FontWeight.w700,
             color: highlight
                 ? AppColors.primary
-                : Colors.white,
+                : AppColors.onSurface,
           ),
         ),
       ],

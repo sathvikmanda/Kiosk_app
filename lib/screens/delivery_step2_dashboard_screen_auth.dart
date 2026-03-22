@@ -234,7 +234,7 @@ class _DeliveryStep2DashboardScreenAuthState
                           style: AppText.titleM.copyWith(
                             color: selected
                                 ? AppColors.primary
-                                : Colors.white,
+                                : AppColors.onSurface,
                           ),
                         ),
                       ),
@@ -273,7 +273,7 @@ class _DeliveryStep2DashboardScreenAuthState
               child: Text(
   'UNLOCK LOCKER',
   style: AppText.titleM.copyWith(
-    color: Colors.white,
+    color: AppColors.onSurface,
     fontWeight: FontWeight.w800,
     letterSpacing: 1.2,
   ),
@@ -324,7 +324,7 @@ class _DeliveryStep2DashboardScreenAuthState
             border: Border.all(
               color: selected
                   ? AppColors.primary
-                  : Colors.white12,
+                  : AppColors.subtle,
               width: 2,
             ),
             borderRadius: BorderRadius.circular(18),

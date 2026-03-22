@@ -302,7 +302,7 @@ Widget _reservationPanel() {
               onPressed: _loadCourierPartners,
               style: ElevatedButton.styleFrom(
                 backgroundColor: navy, // 🟧 ORANGE
-                foregroundColor: Colors.white,      // 🤍 ICON + TEXT
+                foregroundColor: AppColors.onPrimary,      // 🤍 ICON + TEXT
                 elevation: 2,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(18),
@@ -316,7 +316,7 @@ Widget _reservationPanel() {
               label: Text(
                 'DROP AS COURIER',
                 style: AppText.titleM.copyWith(
-                  color: Colors.white,
+                  color: AppColors.onSurface,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 1.0,
                 ),
@@ -393,10 +393,6 @@ Widget _courierSummaryPanel() {
     title: 'SUMMARY.',
     child: Column(
       children: [
-        _summaryRow('Drop Charge', 'FREE'),
-        const SizedBox(height: 16),
-        _summaryRow('Prepaid Time', 'FREE'),
-        const Divider(height: 32),
         _summaryRow('TOTAL.', 'FREE', highlight: true),
         const Spacer(),
         SizedBox(
@@ -448,7 +444,7 @@ Widget _courierSummaryPanel() {
             child: Text(
               'UNLOCK LOCKER',
               style: AppText.titleM.copyWith(
-                color: Colors.white,
+                color: AppColors.onSurface,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.2,
               ),
@@ -468,11 +464,9 @@ Widget _courierSummaryPanel() {
       title: 'SUMMARY.',
       child: Column(
         children: [
-          _summaryRow('Drop Charge', '₹$dropCharge'),
-          const SizedBox(height: 16),
           _summaryRow('Prepaid Time', '₹$prepaidAmount'),
           const Divider(height: 32),
-          _summaryRow('TOTAL.', '₹$total', highlight: true),
+          _summaryRow('TOTAL.', '₹$prepaidAmount', highlight: true),
           const Spacer(),
           SizedBox(
             width: double.infinity,
@@ -488,7 +482,6 @@ Widget _courierSummaryPanel() {
                       size: selectedSize,
                       hours: selectedHours,
                       ratePerHour: hourlyRate,
-                      dropCharge: dropCharge,
                       helpId: widget.helpId,
                     ),
                   ),
@@ -497,7 +490,7 @@ Widget _courierSummaryPanel() {
               child: Text(
                 'CONTINUE',
                 style: AppText.titleM.copyWith(
-                  color: Colors.white,
+                  color: AppColors.onSurface,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 1.0,
                 ),
@@ -566,7 +559,7 @@ Widget _courierSummaryPanel() {
             border: Border.all(
               color: selected
                   ? AppColors.primary
-                  : Colors.white12,
+                  : AppColors.subtle,
               width: 2,
             ),
             borderRadius: BorderRadius.circular(18),

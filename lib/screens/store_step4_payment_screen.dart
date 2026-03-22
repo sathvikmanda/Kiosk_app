@@ -38,6 +38,7 @@ class _StoreStep4PaymentScreenState
   late Razorpay _razorpay;
 
   bool isLoading = false;
+  bool _paymentLaunched = false; // guard against double-tap
 
   String? parcelId;
   int? backendAmountPaise;
@@ -69,6 +70,9 @@ class _StoreStep4PaymentScreenState
   // ================= START PAYMENT =================
 
   Future<void> _startPayment() async {
+    if (_paymentLaunched) return;
+    _paymentLaunched = true;
+
     // 🔥 Make Razorpay feel fullscreen
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.immersiveSticky,
@@ -182,6 +186,7 @@ Future<void> _onPaymentSuccess(PaymentSuccessResponse res) async {
 
   void _onPaymentError(PaymentFailureResponse res) {
     InactivityController().resumeAfterPayment();
+    _paymentLaunched = false; // allow retry
     ImmersiveMode.enable();
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.edgeToEdge,
@@ -277,10 +282,9 @@ Future<void> _onPaymentSuccess(PaymentSuccessResponse res) async {
             width: double.infinity,
             height: 68,
             child: ElevatedButton(
-              onPressed: isLoading ? null : _startPayment,
+              onPressed: (isLoading || _paymentLaunched) ? null : _startPayment,
               child: isLoading
-                  ? const CircularProgressIndicator(
-                      color: Colors.white)
+                  ? CircularProgressIndicator(color: AppColors.onSurface)
                   : Text('PAY & CONTINUE'),
             ),
           ),
@@ -302,7 +306,7 @@ Future<void> _onPaymentSuccess(PaymentSuccessResponse res) async {
             style: AppText.titleL.copyWith(
               fontSize: highlight ? 32 : 18,
               color:
-                  highlight ? AppColors.primary : Colors.white,
+                  highlight ? AppColors.primary : AppColors.onSurface,
             ),
           ),
         ],

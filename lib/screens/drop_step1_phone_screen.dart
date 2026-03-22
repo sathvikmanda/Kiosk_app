@@ -149,7 +149,7 @@ void initState() {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _phone.length == phoneLength
                       ? AppColors.primary
-                      : Colors.grey.shade800,
+                      : AppColors.card,
                   foregroundColor: Colors.black,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -203,7 +203,7 @@ void initState() {
             ApiService.stopComplaint(widget.helpId); // 🔴 stop recording
             Navigator.pop(context);
           },
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
           label: Text('BACK'),
         ),
       ],
@@ -220,7 +220,7 @@ void initState() {
           border: Border.all(
             color: i < _phone.length
                 ? AppColors.primary
-                : Colors.white12,
+                : AppColors.subtle,
           ),
         ),
         child: Text(
@@ -228,7 +228,7 @@ void initState() {
           style: AppText.titleM.copyWith(
             color: i < _phone.length
                 ? AppColors.primary
-                : Colors.white38,
+                : AppColors.placeholder,
           ),
         ),
       );

@@ -32,10 +32,13 @@ class _DropSelfAuthOtpScreenState
   static const int otpLength = 6;
   final List<String> _otp = [];
 
-  // ===== RESEND TIMER =====
   static const int _resendDuration = 30;
   int _secondsLeft = _resendDuration;
   Timer? _timer;
+
+  // WhatsApp: active immediately, counts after first send
+  int _waSecondsLeft = 0;
+  Timer? _waTimer;
 
   @override
   void initState() {
@@ -49,19 +52,34 @@ class _DropSelfAuthOtpScreenState
   @override
   void dispose() {
     _timer?.cancel();
+    _waTimer?.cancel();
     super.dispose();
   }
 
   void _startTimer() {
     _timer?.cancel();
     setState(() => _secondsLeft = _resendDuration);
-
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) return t.cancel();
       if (_secondsLeft <= 1) {
         t.cancel();
         setState(() => _secondsLeft = 0);
       } else {
         setState(() => _secondsLeft--);
+      }
+    });
+  }
+
+  void _startWaTimer() {
+    _waTimer?.cancel();
+    setState(() => _waSecondsLeft = _resendDuration);
+    _waTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) return t.cancel();
+      if (_waSecondsLeft <= 1) {
+        t.cancel();
+        setState(() => _waSecondsLeft = 0);
+      } else {
+        setState(() => _waSecondsLeft--);
       }
     });
   }
@@ -131,15 +149,18 @@ class _DropSelfAuthOtpScreenState
   }
 
   Future<void> _resendOtpWhatsapp() async {
+    if (_waSecondsLeft > 0) return;
     try {
       await ApiService.resendOtpWhatsapp(phone: widget.senderPhone);
+      _startWaTimer();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('OTP sent on WhatsApp')),
       );
     } catch (_) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Failed to resend OTP on WhatsApp')),
+        const SnackBar(content: Text('Failed to resend OTP on WhatsApp')),
       );
     }
   }
@@ -244,7 +265,7 @@ class _DropSelfAuthOtpScreenState
             width: double.infinity,
             height: 56,
             child: OutlinedButton(
-              onPressed: _resendOtpWhatsapp,
+              onPressed: _waSecondsLeft == 0 ? _resendOtpWhatsapp : null,
               style: OutlinedButton.styleFrom(
                 side: BorderSide(
                     color: AppColors.primary, width: 3),
@@ -253,9 +274,11 @@ class _DropSelfAuthOtpScreenState
                 ),
               ),
               child: Text(
-                'RESEND OTP ON WHATSAPP',
+                _waSecondsLeft > 0
+                    ? 'WHATSAPP OTP IN ${_waSecondsLeft}s'
+                    : 'RESEND OTP ON WHATSAPP',
                 style: AppText.titleM.copyWith(
-                  color: AppColors.primary,
+                  color: _waSecondsLeft == 0 ? AppColors.primary : AppColors.placeholder,
                   letterSpacing: 1.2,
                 ),
               ),
@@ -277,7 +300,7 @@ class _DropSelfAuthOtpScreenState
         color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: filled ? AppColors.primary : Colors.white12,
+          color: filled ? AppColors.primary : AppColors.subtle,
           width: 1.4,
         ),
       ),
@@ -285,7 +308,7 @@ class _DropSelfAuthOtpScreenState
         filled ? _otp[i] : '•',
         style: AppText.titleL.copyWith(
           fontSize: 22,
-          color: filled ? AppColors.primary : Colors.white38,
+          color: filled ? AppColors.primary : AppColors.placeholder,
         ),
       ),
     );
@@ -326,7 +349,7 @@ class _DropSelfAuthOtpScreenState
               child: Text(
   'VERIFY OTP',
   style: TextStyle(
-    color: Colors.white,
+    color: AppColors.onSurface,
     fontWeight: FontWeight.w900,
     fontSize: 30,
     letterSpacing: 1.1,
@@ -357,7 +380,7 @@ class _DropSelfAuthOtpScreenState
   fontSize: isNumber ? 34 : 20,
   fontWeight: isNumber ? FontWeight.w900 : FontWeight.w600,
   color: label == 'Clear'
-      ? Colors.white70
+      ? AppColors.inactive
       : AppColors.primary,
 ),
 

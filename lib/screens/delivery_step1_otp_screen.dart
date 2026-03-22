@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
 import '../core/app_text.dart';
@@ -21,9 +22,59 @@ class DeliveryStep1OtpScreen extends StatefulWidget {
 
 class _DeliveryStep1OtpScreenState extends State<DeliveryStep1OtpScreen> {
   static const int otpLength = 6;
-  final List<String> _otp = [];
+  static const int _resendDuration = 30;
 
+  final List<String> _otp = [];
   bool _loading = false;
+
+  // SMS timer: 30s cooldown
+  int _smsSecondsLeft = _resendDuration;
+  Timer? _smsTimer;
+
+  // WhatsApp timer: active immediately, 30s cooldown after send
+  int _waSecondsLeft = 0;
+  Timer? _waTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startSmsTimer();
+  }
+
+  @override
+  void dispose() {
+    _smsTimer?.cancel();
+    _waTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startSmsTimer() {
+    _smsTimer?.cancel();
+    setState(() => _smsSecondsLeft = _resendDuration);
+    _smsTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) return t.cancel();
+      if (_smsSecondsLeft <= 1) {
+        t.cancel();
+        setState(() => _smsSecondsLeft = 0);
+      } else {
+        setState(() => _smsSecondsLeft--);
+      }
+    });
+  }
+
+  void _startWaTimer() {
+    _waTimer?.cancel();
+    setState(() => _waSecondsLeft = _resendDuration);
+    _waTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) return t.cancel();
+      if (_waSecondsLeft <= 1) {
+        t.cancel();
+        setState(() => _waSecondsLeft = 0);
+      } else {
+        setState(() => _waSecondsLeft--);
+      }
+    });
+  }
 
   void _onKey(String v) {
     setState(() {
@@ -56,6 +107,7 @@ class _DeliveryStep1OtpScreenState extends State<DeliveryStep1OtpScreen> {
         ),
       );
     } catch (_) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Invalid OTP')),
       );
@@ -64,15 +116,17 @@ class _DeliveryStep1OtpScreenState extends State<DeliveryStep1OtpScreen> {
     }
   }
 
-  // ================= RESEND =================
-
   Future<void> _resendOtp() async {
+    if (_smsSecondsLeft > 0) return;
     try {
       await ApiService.sendOtp(phone: widget.recipientPhone);
+      _startSmsTimer();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('OTP resent')),
       );
     } catch (_) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to resend OTP')),
       );
@@ -80,14 +134,16 @@ class _DeliveryStep1OtpScreenState extends State<DeliveryStep1OtpScreen> {
   }
 
   Future<void> _resendOtpWhatsapp() async {
+    if (_waSecondsLeft > 0) return;
     try {
-      await ApiService.resendOtpWhatsapp(
-        phone: widget.recipientPhone,
-      );
+      await ApiService.resendOtpWhatsapp(phone: widget.recipientPhone);
+      _startWaTimer();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('OTP sent on WhatsApp')),
       );
     } catch (_) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to send WhatsApp OTP')),
       );
@@ -127,8 +183,6 @@ class _DeliveryStep1OtpScreenState extends State<DeliveryStep1OtpScreen> {
     );
   }
 
-  // ================= HEADER =================
-
   Widget _header(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -144,14 +198,12 @@ class _DeliveryStep1OtpScreenState extends State<DeliveryStep1OtpScreen> {
               (_) => false,
             );
           },
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
           label: Text('BACK'),
         ),
       ],
     );
   }
-
-  // ================= LEFT PANEL =================
 
   Widget _leftPanel() {
     return Container(
@@ -178,12 +230,12 @@ class _DeliveryStep1OtpScreenState extends State<DeliveryStep1OtpScreen> {
 
           const SizedBox(height: 24),
 
-          // 🔁 RESEND OTP (SMS)
+          // 🔁 RESEND OTP (SMS) — 30s cooldown
           SizedBox(
             width: double.infinity,
             height: 56,
             child: OutlinedButton(
-              onPressed: _resendOtp,
+              onPressed: _smsSecondsLeft == 0 ? _resendOtp : null,
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: AppColors.primary, width: 3),
                 shape: RoundedRectangleBorder(
@@ -191,9 +243,11 @@ class _DeliveryStep1OtpScreenState extends State<DeliveryStep1OtpScreen> {
                 ),
               ),
               child: Text(
-                'RESEND OTP',
+                _smsSecondsLeft > 0
+                    ? 'RESEND OTP IN ${_smsSecondsLeft}s'
+                    : 'RESEND OTP',
                 style: AppText.titleM.copyWith(
-                  color: AppColors.primary,
+                  color: _smsSecondsLeft == 0 ? AppColors.primary : AppColors.placeholder,
                   letterSpacing: 1.2,
                 ),
               ),
@@ -202,12 +256,12 @@ class _DeliveryStep1OtpScreenState extends State<DeliveryStep1OtpScreen> {
 
           const SizedBox(height: 16),
 
-          // 💬 RESEND OTP WHATSAPP
+          // 💬 RESEND OTP WHATSAPP — active immediately, 30s after send
           SizedBox(
             width: double.infinity,
             height: 56,
             child: OutlinedButton(
-              onPressed: _resendOtpWhatsapp,
+              onPressed: _waSecondsLeft == 0 ? _resendOtpWhatsapp : null,
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: AppColors.primary, width: 3),
                 shape: RoundedRectangleBorder(
@@ -215,9 +269,11 @@ class _DeliveryStep1OtpScreenState extends State<DeliveryStep1OtpScreen> {
                 ),
               ),
               child: Text(
-                'RESEND OTP ON WHATSAPP',
+                _waSecondsLeft > 0
+                    ? 'WHATSAPP OTP IN ${_waSecondsLeft}s'
+                    : 'RESEND OTP ON WHATSAPP',
                 style: AppText.titleM.copyWith(
-                  color: AppColors.primary,
+                  color: _waSecondsLeft == 0 ? AppColors.primary : AppColors.placeholder,
                   letterSpacing: 1.2,
                 ),
               ),
@@ -260,8 +316,6 @@ class _DeliveryStep1OtpScreenState extends State<DeliveryStep1OtpScreen> {
     );
   }
 
-  // ================= RIGHT PANEL =================
-
   Widget _rightPanel(List<String> keys) {
     return Container(
       padding: const EdgeInsets.all(32),
@@ -293,7 +347,7 @@ class _DeliveryStep1OtpScreenState extends State<DeliveryStep1OtpScreen> {
               onPressed:
                   _otp.length == otpLength && !_loading ? _verify : null,
               child: _loading
-                  ? const CircularProgressIndicator(color: Colors.white)
+                  ? const CircularProgressIndicator(color: AppColors.onPrimary)
                   : Text('VERIFY OTP'),
             ),
           ),
@@ -301,8 +355,6 @@ class _DeliveryStep1OtpScreenState extends State<DeliveryStep1OtpScreen> {
       ),
     );
   }
-
-  // ================= UI PARTS =================
 
   Widget _otpBox(int i) {
     final filled = i < _otp.length;
@@ -314,13 +366,13 @@ class _DeliveryStep1OtpScreenState extends State<DeliveryStep1OtpScreen> {
         color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: filled ? AppColors.primary : Colors.white12,
+          color: filled ? AppColors.primary : AppColors.subtle,
         ),
       ),
       child: Text(
         filled ? _otp[i] : '•',
         style: AppText.titleM.copyWith(
-          color: filled ? AppColors.primary : Colors.white38,
+          color: filled ? AppColors.primary : AppColors.placeholder,
         ),
       ),
     );

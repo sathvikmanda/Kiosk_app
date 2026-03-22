@@ -173,7 +173,7 @@ void initState() {
               style: ElevatedButton.styleFrom(
                 backgroundColor: senderPhone.length == phoneLength
                     ? AppColors.primary
-                    : Colors.grey.shade800,
+                    : AppColors.card,
                 foregroundColor: Colors.black,
               ),
               onPressed:
@@ -199,7 +199,7 @@ void initState() {
         color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: filled ? AppColors.primary : Colors.white12,
+          color: filled ? AppColors.primary : AppColors.subtle,
           width: 1.4,
         ),
       ),
@@ -207,7 +207,7 @@ void initState() {
         filled ? _digits[i] : '•',
         style: AppText.titleL.copyWith(
           fontSize: 22,
-          color: filled ? AppColors.primary : Colors.white38,
+          color: filled ? AppColors.primary : AppColors.placeholder,
         ),
       ),
     );
@@ -229,7 +229,7 @@ void initState() {
             style: AppText.titleL.copyWith(
               fontSize: isNumber ? 32 : 20,
               color: v == 'Clear'
-                  ? Colors.white70
+                  ? AppColors.inactive
                   : AppColors.primary,
             ),
           ),

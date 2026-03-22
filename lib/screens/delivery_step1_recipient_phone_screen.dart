@@ -92,7 +92,7 @@ class _DeliveryStep1RecipientPhoneScreenState
               (_) => false,
             );
           },
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
           label: Text('BACK'),
         ),
       ],
@@ -176,13 +176,13 @@ class _DeliveryStep1RecipientPhoneScreenState
         color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: filled ? AppColors.primary : Colors.white12,
+          color: filled ? AppColors.primary : AppColors.subtle,
         ),
       ),
       child: Text(
         filled ? _digits[i] : '•',
         style: AppText.titleM.copyWith(
-          color: filled ? AppColors.primary : Colors.white38,
+          color: filled ? AppColors.primary : AppColors.placeholder,
         ),
       ),
     );

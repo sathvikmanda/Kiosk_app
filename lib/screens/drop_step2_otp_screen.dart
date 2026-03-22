@@ -29,10 +29,13 @@ class _DropStep2OtpScreenState extends State<DropStep2OtpScreen> {
   static const int otpLength = 6;
   final List<String> _otp = [];
 
-  // ===== RESEND TIMER =====
   static const int _resendDuration = 30;
   int _secondsLeft = _resendDuration;
   Timer? _timer;
+
+  // WhatsApp: active immediately, counts after first send
+  int _waSecondsLeft = 0;
+  Timer? _waTimer;
 
   @override
   void initState() {
@@ -46,19 +49,34 @@ class _DropStep2OtpScreenState extends State<DropStep2OtpScreen> {
   @override
   void dispose() {
     _timer?.cancel();
+    _waTimer?.cancel();
     super.dispose();
   }
 
   void _startTimer() {
     _timer?.cancel();
     setState(() => _secondsLeft = _resendDuration);
-
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) return t.cancel();
       if (_secondsLeft <= 1) {
         t.cancel();
         setState(() => _secondsLeft = 0);
       } else {
         setState(() => _secondsLeft--);
+      }
+    });
+  }
+
+  void _startWaTimer() {
+    _waTimer?.cancel();
+    setState(() => _waSecondsLeft = _resendDuration);
+    _waTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) return t.cancel();
+      if (_waSecondsLeft <= 1) {
+        t.cancel();
+        setState(() => _waSecondsLeft = 0);
+      } else {
+        setState(() => _waSecondsLeft--);
       }
     });
   }
@@ -123,18 +141,18 @@ class _DropStep2OtpScreenState extends State<DropStep2OtpScreen> {
   }
 
   Future<void> _resendOtpWhatsapp() async {
+    if (_waSecondsLeft > 0) return;
     try {
-      await ApiService.resendOtpWhatsapp(
-        phone: widget.recipientPhone,
-      );
+      await ApiService.resendOtpWhatsapp(phone: widget.recipientPhone);
+      _startWaTimer();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('OTP sent on WhatsApp')),
       );
     } catch (_) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to resend OTP on WhatsApp'),
-        ),
+        const SnackBar(content: Text('Failed to resend OTP on WhatsApp')),
       );
     }
   }
@@ -223,7 +241,7 @@ class _DropStep2OtpScreenState extends State<DropStep2OtpScreen> {
               width: double.infinity,
               height: 56,
               child: OutlinedButton(
-                onPressed: _resendOtpWhatsapp,
+                onPressed: _waSecondsLeft == 0 ? _resendOtpWhatsapp : null,
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: AppColors.primary, width: 3),
                   shape: RoundedRectangleBorder(
@@ -231,9 +249,11 @@ class _DropStep2OtpScreenState extends State<DropStep2OtpScreen> {
                   ),
                 ),
                 child: Text(
-                  'RESEND OTP ON WHATSAPP',
+                  _waSecondsLeft > 0
+                      ? 'WHATSAPP OTP IN ${_waSecondsLeft}s'
+                      : 'RESEND OTP ON WHATSAPP',
                   style: AppText.titleM.copyWith(
-                    color: AppColors.primary,
+                    color: _waSecondsLeft == 0 ? AppColors.primary : AppColors.placeholder,
                     letterSpacing: 1.2,
                     fontWeight: FontWeight.w700,
                   ),
@@ -331,7 +351,7 @@ class _DropStep2OtpScreenState extends State<DropStep2OtpScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _otp.length == otpLength
                       ? AppColors.primary
-                      : Colors.grey.shade800,
+                      : AppColors.card,
                 ),
                 onPressed: _otp.length == otpLength
                     ? _verifyOtp
@@ -371,7 +391,7 @@ class _DropStep2OtpScreenState extends State<DropStep2OtpScreen> {
           border: Border.all(
             color: i < _otp.length
                 ? AppColors.primary
-                : Colors.white12,
+                : AppColors.subtle,
           ),
         ),
         child: Text(
@@ -379,7 +399,7 @@ class _DropStep2OtpScreenState extends State<DropStep2OtpScreen> {
           style: AppText.titleM.copyWith(
             color: i < _otp.length
                 ? AppColors.primary
-                : Colors.white38,
+                : AppColors.placeholder,
           ),
         ),
       );

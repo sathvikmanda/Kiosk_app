@@ -15,18 +15,15 @@ class DropStep4PaymentScreenAuth extends StatefulWidget {
     required this.size,
     required this.hours,
     required this.ratePerHour,
-    required this.dropCharge,
     required this.helpId,
   });
   final String helpId;
-
 
   final String senderPhone;
   final String recipientPhone;
   final String size;
   final int hours;
   final int ratePerHour;
-  final int dropCharge;
 
   @override
   State<DropStep4PaymentScreenAuth> createState() =>
@@ -37,14 +34,11 @@ class _DropStep4PaymentScreenAuthState
     extends State<DropStep4PaymentScreenAuth> {
   late Razorpay _razorpay;
   bool loading = false;
+  bool _paymentLaunched = false; // guard against double-tap
   String? parcelId;
 
-  static const double gstPercent = 18;
-
   int get prepaid => widget.hours * widget.ratePerHour;
-  int get subtotal => prepaid + widget.dropCharge;
-  double get gst => subtotal * gstPercent / 100;
-  int get total => (subtotal).round();
+  int get total => prepaid;
 
   @override
   void initState() {
@@ -63,6 +57,8 @@ class _DropStep4PaymentScreenAuthState
   // ================= START PAYMENT =================
 
   Future<void> _startPayment() async {
+    if (_paymentLaunched) return;
+    _paymentLaunched = true;
     setState(() => loading = true);
 
     try {
@@ -117,6 +113,7 @@ class _DropStep4PaymentScreenAuthState
         MaterialPageRoute(
           builder: (_) => DropStep5LockerOpeningScreen(
             phoneNumber: widget.senderPhone,
+            recipientPhone: widget.recipientPhone,
             accessCode: result['accessCode'],
             helpId: widget.helpId,
           ),
@@ -129,6 +126,7 @@ class _DropStep4PaymentScreenAuthState
 
   void _onPaymentError(PaymentFailureResponse res) {
     InactivityController().resumeAfterPayment();
+    _paymentLaunched = false; // allow retry
     _error('Payment cancelled');
   }
 
@@ -170,19 +168,15 @@ class _DropStep4PaymentScreenAuthState
                     _row('Duration', '${widget.hours} hrs'),
                     _row('Rate', '₹${widget.ratePerHour} / hr'),
                     const Divider(height: 32),
-                    _row('Prepaid', '₹$prepaid'),
-                    _row('Drop Charge', '₹${widget.dropCharge}'),
-                    const Divider(height: 32),
                     _row('TOTAL', '₹$total', highlight: true),
                     const Spacer(),
                     SizedBox(
                       width: double.infinity,
                       height: 68,
                       child: ElevatedButton(
-                        onPressed: loading ? null : _startPayment,
+                        onPressed: (loading || _paymentLaunched) ? null : _startPayment,
                         child: loading
-                            ? const CircularProgressIndicator(
-                                color: Colors.white)
+                            ? CircularProgressIndicator(color: AppColors.onSurface)
                             : Text('PAY & CONTINUE',
                                 style: AppText.titleL),
                       ),
@@ -227,7 +221,7 @@ class _DropStep4PaymentScreenAuthState
           value,
           style: AppText.titleL.copyWith(
             fontSize: highlight ? 30 : 18, // ⬇️ smaller values
-            color: highlight ? AppColors.primary : Colors.white,
+            color: highlight ? AppColors.primary : AppColors.onSurface,
           ),
         ),
       ],

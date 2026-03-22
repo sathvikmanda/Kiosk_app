@@ -42,7 +42,7 @@ class AppTheme {
   static ThemeData get light {
     return ThemeData(
       brightness: Brightness.light,
-      scaffoldBackgroundColor: const Color(0xFFFFFFFF),
+      scaffoldBackgroundColor: const Color(0xFFF0F0F0),
       fontFamily: 'Sora',
       colorScheme: const ColorScheme.light(
         primary: primary,
@@ -61,11 +61,11 @@ class AppTheme {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
       ),
-      dividerColor: const Color(0xFFDDDDDD),
+      dividerColor: const Color(0xFFBBBBBB),
       inputDecorationTheme: const InputDecorationTheme(
-        labelStyle: TextStyle(color: Color(0xFF666666)),
+        labelStyle: TextStyle(color: Color(0xFF555555)),
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Color(0xFFDDDDDD)),
+          borderSide: BorderSide(color: Color(0xFFBBBBBB)),
         ),
         focusedBorder: OutlineInputBorder(
           borderSide: BorderSide(color: primary, width: 2),

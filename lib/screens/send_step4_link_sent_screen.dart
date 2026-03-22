@@ -143,7 +143,7 @@ class _SendStep4LinkSentScreenState extends State<SendStep4LinkSentScreen> {
                   style: AppText.caption.copyWith(
                     color: _tapEnabled
                         ? AppColors.primary
-                        : Colors.white54,
+                        : AppColors.placeholder,
                   ),
                 ),
 

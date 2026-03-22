@@ -66,7 +66,7 @@ class _SendStep2LinkSentScreenState extends State<SendStep2LinkSentScreen> {
       behavior: HitTestBehavior.opaque,
       onTap: _goHome,
       child: Scaffold(
-        backgroundColor: const Color(0xFF0B0B0B),
+        backgroundColor: AppColors.background,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -78,13 +78,13 @@ class _SendStep2LinkSentScreenState extends State<SendStep2LinkSentScreen> {
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w900,
-                  color: Colors.white,
+                  color: AppColors.onSurface,
                 ),
               ),
               const SizedBox(height: 16),
               Text(
                 'A secure link has been sent to',
-                style: TextStyle(color: Colors.white60),
+                style: TextStyle(color: AppColors.onSurfaceMuted),
               ),
               const SizedBox(height: 8),
               Text(
@@ -99,12 +99,12 @@ class _SendStep2LinkSentScreenState extends State<SendStep2LinkSentScreen> {
               Text(
                 'Please continue on WhatsApp\n to complete your drop.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white70, height: 1.4),
+                style: TextStyle(color: AppColors.inactive, height: 1.4),
               ),
               const SizedBox(height: 24),
               Text(
                 'TAP ANYWHERE TO RETURN HOME',
-                style: TextStyle(color: Colors.white38),
+                style: TextStyle(color: AppColors.placeholder),
               ),
             ],
           ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../core/app_colors.dart';
@@ -11,13 +12,14 @@ import 'locker_open_guard_overlay.dart';
 import '../models/drop_mode.dart';
 
 import 'help_screen.dart';
-import '../hidden_admin_unlock.dart';
 import '../kiosk_controller.dart';
+import '../core/theme_notifier.dart';
+import '../main.dart';
 import 'store_step1_screen.dart';
 import 'send_step3_delivery_estimate_screen.dart';
 import 'locker_opened_screen.dart';
 import '../services/api_service.dart';
-import '../services/audio_service.dart'; // 👈 ADD
+import '../services/audio_service.dart';
 import 'delivery_step1_recipient_phone_screen.dart';
 import 'drop_step1_phone_screen.dart';
 import 'overstay_payment_screen.dart';
@@ -50,6 +52,10 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
 
   final LockerStateService _lockerState = LockerStateService();
   bool _showInactivityWarning = false;
+
+  // ── Admin 5-tap on DropPoint text ──────────────────────────
+  int _adminTapCount = 0;
+  Timer? _adminTapTimer;
 
   @override
   void initState() {
@@ -89,6 +95,7 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
     InactivityController().dispose();
     _lockerState.dispose();
     _pulseController.dispose();
+    _adminTapTimer?.cancel();
     super.dispose();
   }
 
@@ -100,8 +107,26 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
       _scanInProgress = false;
       _recordingStartInProgress = false;
       _showInactivityWarning = false;
-      _showAudioTester = false; // 👈 ADD
+      _showAudioTester = false;
     });
+  }
+
+  // ── Admin access: 5 taps on DropPoint text within 2 seconds ──
+  void _handleAdminTap() {
+    _adminTapCount++;
+    _adminTapTimer?.cancel();
+    _adminTapTimer = Timer(const Duration(seconds: 2), () {
+      _adminTapCount = 0;
+    });
+
+    if (_adminTapCount >= 5) {
+      _adminTapCount = 0;
+      _adminTapTimer?.cancel();
+      showDialog(
+        context: context,
+        builder: (_) => const _AdminPinDialog(),
+      );
+    }
   }
 
   // ================= QR SCAN =================
@@ -233,17 +258,16 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    return HiddenAdminUnlock(
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: Stack(
-          children: [
-            Row(
-              children: [
-                _leftPanel(context),
-                _rightPanel(context),
-              ],
-            ),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: Stack(
+        children: [
+          Row(
+            children: [
+              _leftPanel(context),
+              _rightPanel(context),
+            ],
+          ),
 
             Positioned(
               top: 18,
@@ -285,8 +309,7 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
               Positioned.fill(
                 child: Container(color: Colors.black.withOpacity(0)),
               ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -301,7 +324,7 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.92),
+          color: AppColors.overlay,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: AppColors.primary, width: 1.5),
         ),
@@ -328,7 +351,7 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
                     AudioService.stop();
                     setState(() => _showAudioTester = false);
                   },
-                  child: const Icon(Icons.close, color: Colors.white54, size: 22),
+                  child: Icon(Icons.close, color: AppColors.placeholder, size: 22),
                 ),
               ],
             ),
@@ -336,7 +359,7 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
             const SizedBox(height: 16),
 
             // Sound selector
-            Text('Sound', style: TextStyle(color: Colors.white54, fontSize: 12)),
+            Text('Sound', style: TextStyle(color: AppColors.placeholder, fontSize: 12)),
             const SizedBox(height: 8),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -349,16 +372,16 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
                       margin: const EdgeInsets.only(right: 8),
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: selected ? AppColors.primary : Colors.white10,
+                        color: selected ? AppColors.primary : AppColors.subtle,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: selected ? AppColors.primary : Colors.white24,
+                          color: selected ? AppColors.primary : AppColors.subtle,
                         ),
                       ),
                       child: Text(
                         event.name,
                         style: TextStyle(
-                          color: selected ? Colors.black : Colors.white70,
+                          color: selected ? AppColors.onPrimary : AppColors.inactive,
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                         ),
@@ -374,7 +397,7 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
             // Balance slider
             Row(
               children: [
-                Text('🔈 L', style: TextStyle(color: Colors.white54, fontSize: 13)),
+                Text('🔈 L', style: TextStyle(color: AppColors.placeholder, fontSize: 13)),
                 Expanded(
                   child: Slider(
                     value: _testBalance,
@@ -382,11 +405,11 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
                     max: 1.0,
                     divisions: 20,
                     activeColor: AppColors.primary,
-                    inactiveColor: Colors.white12,
+                    inactiveColor: AppColors.subtle,
                     onChanged: (val) => setState(() => _testBalance = val),
                   ),
                 ),
-                Text('R 🔉', style: TextStyle(color: Colors.white54, fontSize: 13)),
+                Text('R 🔉', style: TextStyle(color: AppColors.placeholder, fontSize: 13)),
               ],
             ),
 
@@ -412,7 +435,7 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
                 Expanded(
                   child: _testerButton(
                     label: '▶ Play Once',
-                    color: Colors.white10,
+                    color: AppColors.subtle,
                     onTap: () => AudioService.playWithBalance(_selectedEvent, _testBalance),
                   ),
                 ),
@@ -421,7 +444,7 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
                 Expanded(
                   child: _testerButton(
                     label: '🔁 Loop',
-                    color: Colors.white10,
+                    color: AppColors.subtle,
                     onTap: () => AudioService.loopWithBalance(_selectedEvent, _testBalance),
                   ),
                 ),
@@ -430,7 +453,7 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
                 Expanded(
                   child: _testerButton(
                     label: '↔ Spatial',
-                    color: Colors.white10,
+                    color: AppColors.subtle,
                     onTap: () => AudioService.loopSpatial(_selectedEvent),
                   ),
                 ),
@@ -463,13 +486,13 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.white12),
+          border: Border.all(color: AppColors.subtle),
         ),
         child: Center(
           child: Text(
             label,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: AppColors.onSurface,
               fontSize: 11,
               fontWeight: FontWeight.w700,
             ),
@@ -490,8 +513,9 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-            // 👇 LONG PRESS "DropPoint" to open audio tester
+            // 5 taps → admin panel | long press → audio tester
             GestureDetector(
+              onTap: _handleAdminTap,
               onLongPress: () {
                 setState(() => _showAudioTester = !_showAudioTester);
               },
@@ -798,12 +822,12 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: filled ? AppColors.primary : Colors.white12),
+        border: Border.all(color: filled ? AppColors.primary : AppColors.subtle),
       ),
       child: Text(
         filled ? value : '•',
         style: TextStyle(
-          color: filled ? AppColors.primary : Colors.white38,
+          color: filled ? AppColors.primary : AppColors.placeholder,
           fontSize: 24,
           fontWeight: FontWeight.w600,
         ),
@@ -863,6 +887,124 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
           ),
         ),
       ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+//  Admin PIN Dialog — shown after 5-tap on DropPoint text
+// ════════════════════════════════════════════════════════════════
+
+class _AdminPinDialog extends StatefulWidget {
+  const _AdminPinDialog();
+
+  @override
+  State<_AdminPinDialog> createState() => _AdminPinDialogState();
+}
+
+class _AdminPinDialogState extends State<_AdminPinDialog> {
+  final TextEditingController _pinController = TextEditingController();
+  static const String _adminPin = '5259';
+  bool _unlocked = false;
+  bool _kioskEnabled = true;
+  final _themeNotifier = ThemeNotifier();
+
+  void _toggleTheme(bool isDark) {
+    _themeNotifier.setDark(isDark);
+    setState(() {});
+    Navigator.pop(context);
+    navigatorKey.currentState?.popUntil((route) => route.isFirst);
+  }
+
+  @override
+  void dispose() {
+    _pinController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_unlocked) {
+      return AlertDialog(
+        title: const Text('Admin Panel'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // ── Kiosk Mode ──
+            ListTile(
+              leading: Icon(
+                _kioskEnabled ? Icons.lock : Icons.lock_open,
+                color: _kioskEnabled ? Colors.green : Colors.orange,
+              ),
+              title: Text(_kioskEnabled ? 'Kiosk Mode: ON' : 'Kiosk Mode: OFF'),
+              trailing: Switch(
+                value: _kioskEnabled,
+                activeColor: Colors.green,
+                onChanged: (val) async {
+                  if (val) {
+                    await KioskController.enable();
+                  } else {
+                    await KioskController.disable();
+                  }
+                  setState(() => _kioskEnabled = val);
+                },
+              ),
+            ),
+
+            const Divider(),
+
+            // ── Theme ──
+            ListTile(
+              leading: Icon(
+                _themeNotifier.isDark ? Icons.dark_mode : Icons.light_mode,
+                color: _themeNotifier.isDark ? Colors.indigo : Colors.amber,
+              ),
+              title: Text(
+                _themeNotifier.isDark ? 'Theme: Dark' : 'Theme: Light',
+              ),
+              trailing: Switch(
+                value: _themeNotifier.isDark,
+                activeColor: Colors.indigo,
+                inactiveThumbColor: Colors.amber,
+                inactiveTrackColor: Colors.amber.withOpacity(0.4),
+                onChanged: _toggleTheme,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      );
+    }
+
+    // ── PIN entry ──
+    return AlertDialog(
+      title: const Text('Admin Access'),
+      content: TextField(
+        controller: _pinController,
+        obscureText: true,
+        keyboardType: TextInputType.number,
+        decoration: const InputDecoration(labelText: 'Enter PIN'),
+        autofocus: true,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            if (_pinController.text == _adminPin) {
+              setState(() => _unlocked = true);
+            }
+          },
+          child: const Text('Unlock'),
+        ),
+      ],
     );
   }
 }

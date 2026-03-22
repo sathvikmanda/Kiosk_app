@@ -145,7 +145,7 @@ void initState() {
         color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: filled ? AppColors.primary : Colors.white12,
+          color: filled ? AppColors.primary : AppColors.subtle,
           width: 1.4,
         ),
       ),
@@ -153,7 +153,7 @@ void initState() {
         filled ? _phoneDigits[index] : '•',
         style: AppText.titleL.copyWith(
           fontSize: 22,
-          color: filled ? AppColors.primary : Colors.white38,
+          color: filled ? AppColors.primary : AppColors.placeholder,
         ),
       ),
     );
@@ -199,7 +199,7 @@ void initState() {
                   ? _handleContinue
                   : null,
               child: isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
+                  ? const CircularProgressIndicator(color: AppColors.onPrimary)
                   : Text('CONTINUE.'),
             ),
           ),
@@ -253,7 +253,7 @@ void initState() {
             style: AppText.titleL.copyWith(
               fontSize: isNumber ? 32 : 20,
               color: label == 'Clear'
-                  ? Colors.white70
+                  ? AppColors.inactive
                   : AppColors.primary,
             ),
           ),

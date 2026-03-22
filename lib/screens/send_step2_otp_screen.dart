@@ -42,6 +42,10 @@ class _SendStep2OtpScreenState extends State<SendStep2OtpScreen> {
   int _secondsLeft = resendDuration;
   Timer? _timer;
 
+  // WhatsApp timer: active immediately, 30s cooldown after send
+  int _waSecondsLeft = 0;
+  Timer? _waTimer;
+
   @override
   void initState() {
     super.initState();
@@ -54,19 +58,33 @@ class _SendStep2OtpScreenState extends State<SendStep2OtpScreen> {
   @override
   void dispose() {
     _timer?.cancel();
+    _waTimer?.cancel();
     super.dispose();
   }
 
   void _startTimer() {
     _timer?.cancel();
     _secondsLeft = resendDuration;
-
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) return t.cancel();
       if (_secondsLeft == 0) {
         t.cancel();
       } else {
         setState(() => _secondsLeft--);
+      }
+    });
+  }
+
+  void _startWaTimer() {
+    _waTimer?.cancel();
+    setState(() => _waSecondsLeft = resendDuration);
+    _waTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) return t.cancel();
+      if (_waSecondsLeft <= 1) {
+        t.cancel();
+        setState(() => _waSecondsLeft = 0);
+      } else {
+        setState(() => _waSecondsLeft--);
       }
     });
   }
@@ -144,18 +162,18 @@ class _SendStep2OtpScreenState extends State<SendStep2OtpScreen> {
   }
 
   Future<void> _resendOtpWhatsapp() async {
+    if (_waSecondsLeft > 0) return;
     try {
-      await ApiService.resendOtpWhatsapp(
-        phone: widget.phoneNumber,
-      );
+      await ApiService.resendOtpWhatsapp(phone: widget.phoneNumber);
+      _startWaTimer();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('OTP sent on WhatsApp')),
       );
     } catch (_) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to resend OTP on WhatsApp'),
-        ),
+        const SnackBar(content: Text('Failed to resend OTP on WhatsApp')),
       );
     }
   }
@@ -261,17 +279,19 @@ class _SendStep2OtpScreenState extends State<SendStep2OtpScreen> {
                   style: AppText.muted.copyWith(
                     color: _secondsLeft == 0
                         ? AppColors.primary
-                        : Colors.white38,
+                        : AppColors.placeholder,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
               GestureDetector(
-                onTap: _resendOtpWhatsapp,
+                onTap: _waSecondsLeft == 0 ? _resendOtpWhatsapp : null,
                 child: Text(
-                  'RESEND ON WHATSAPP',
+                  _waSecondsLeft > 0
+                      ? 'WHATSAPP OTP IN ${_waSecondsLeft}s'
+                      : 'RESEND ON WHATSAPP',
                   style: AppText.muted.copyWith(
-                    color: AppColors.primary,
+                    color: _waSecondsLeft == 0 ? AppColors.primary : AppColors.placeholder,
                     fontWeight: FontWeight.w700,
                   ),
                 ),

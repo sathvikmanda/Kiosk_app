@@ -36,37 +36,55 @@ class _StoreStep3OtpScreenState extends State<StoreStep3OtpScreen> {
 
   bool isLoading = false;
 
-  // ===== RESEND TIMER =====
+  // ===== SMS RESEND TIMER (starts at 30, counts down) =====
   static const int _resendDuration = 30;
-  int _secondsLeft = _resendDuration;
-  Timer? _timer;
+  int _smsSecondsLeft = _resendDuration;
+  Timer? _smsTimer;
+
+  // ===== WHATSAPP RESEND TIMER (starts at 0 = active, only counts after first send) =====
+  int _waSecondsLeft = 0;
+  Timer? _waTimer;
 
   @override
   void initState() {
     super.initState();
-      // Delay slightly so audio doesn't clash with navigation
-  Future.delayed(const Duration(milliseconds: 300), () {
-    AudioService.play(AudioEvent.enterotp);
-  });
-    _startResendTimer();
+    Future.delayed(const Duration(milliseconds: 300), () {
+      AudioService.play(AudioEvent.enterotp);
+    });
+    _startSmsTimer();
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _smsTimer?.cancel();
+    _waTimer?.cancel();
     super.dispose();
   }
 
-  void _startResendTimer() {
-    _timer?.cancel();
-    setState(() => _secondsLeft = _resendDuration);
-
-    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (_secondsLeft <= 1) {
+  void _startSmsTimer() {
+    _smsTimer?.cancel();
+    setState(() => _smsSecondsLeft = _resendDuration);
+    _smsTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) return t.cancel();
+      if (_smsSecondsLeft <= 1) {
         t.cancel();
-        setState(() => _secondsLeft = 0);
+        setState(() => _smsSecondsLeft = 0);
       } else {
-        setState(() => _secondsLeft--);
+        setState(() => _smsSecondsLeft--);
+      }
+    });
+  }
+
+  void _startWaTimer() {
+    _waTimer?.cancel();
+    setState(() => _waSecondsLeft = _resendDuration);
+    _waTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) return t.cancel();
+      if (_waSecondsLeft <= 1) {
+        t.cancel();
+        setState(() => _waSecondsLeft = 0);
+      } else {
+        setState(() => _waSecondsLeft--);
       }
     });
   }
@@ -88,36 +106,33 @@ class _StoreStep3OtpScreenState extends State<StoreStep3OtpScreen> {
   // ================= RESEND OTP (WHATSAPP) =================
 
   Future<void> _resendOtpWhatsapp() async {
-    if (_secondsLeft > 0) return;
-
+    if (_waSecondsLeft > 0) return;
     try {
-      await ApiService.resendOtpWhatsapp(
-        phone: widget.phoneNumber,
-      );
-      _startResendTimer();
-
+      await ApiService.resendOtpWhatsapp(phone: widget.phoneNumber);
+      _startWaTimer();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('OTP sent on WhatsApp')),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to resend OTP on WhatsApp')),
       );
     }
   }
-   Future<void> _sendOtp() async {
-    if (_secondsLeft > 0) return;
 
+  Future<void> _sendOtp() async {
+    if (_smsSecondsLeft > 0) return;
     try {
-      await ApiService.sendOtp(
-        phone: widget.phoneNumber,
-      );
-      _startResendTimer();
-
+      await ApiService.sendOtp(phone: widget.phoneNumber);
+      _startSmsTimer();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('OTP sent on SMS')),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to resend OTP on SMS')),
       );
@@ -239,38 +254,37 @@ class _StoreStep3OtpScreenState extends State<StoreStep3OtpScreen> {
           const SizedBox(height: 24),
 
           Center(
-  child: GestureDetector(
-    onTap: _secondsLeft == 0 ? _sendOtp : null,
-    child: Text(
-      _secondsLeft > 0
-          ? 'RESEND OTP IN ${_secondsLeft}s'
-          : 'RESEND OTP',
-      style: AppText.muted.copyWith(
-        color: _secondsLeft == 0
-            ? AppColors.primary
-            : Colors.white38,
-        decoration:
-            _secondsLeft == 0 ? TextDecoration.underline : null,
-        fontWeight: FontWeight.w600,
-      ),
-    ),
-  ),
-),
-
+            child: GestureDetector(
+              onTap: _smsSecondsLeft == 0 ? _sendOtp : null,
+              child: Text(
+                _smsSecondsLeft > 0
+                    ? 'RESEND OTP IN ${_smsSecondsLeft}s'
+                    : 'RESEND OTP',
+                style: AppText.muted.copyWith(
+                  color: _smsSecondsLeft == 0
+                      ? AppColors.primary
+                      : AppColors.placeholder,
+                  decoration:
+                      _smsSecondsLeft == 0 ? TextDecoration.underline : null,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
 
           const SizedBox(height: 16),
 
-          // 🔥 WHATSAPP RESEND BUTTON
+          // 🔥 WHATSAPP RESEND BUTTON — active immediately, disabled 30s after send
           SizedBox(
             width: double.infinity,
             height: 52,
             child: OutlinedButton(
-              onPressed: _secondsLeft == 0 ? _resendOtpWhatsapp : null,
+              onPressed: _waSecondsLeft == 0 ? _resendOtpWhatsapp : null,
               style: OutlinedButton.styleFrom(
                 side: BorderSide(
-                  color: _secondsLeft == 0
+                  color: _waSecondsLeft == 0
                       ? AppColors.primary
-                      : Colors.white24,
+                      : AppColors.subtle,
                   width: 2,
                 ),
                 shape: RoundedRectangleBorder(
@@ -278,11 +292,13 @@ class _StoreStep3OtpScreenState extends State<StoreStep3OtpScreen> {
                 ),
               ),
               child: Text(
-                'RESEND OTP ON WHATSAPP',
+                _waSecondsLeft > 0
+                    ? 'WHATSAPP OTP IN ${_waSecondsLeft}s'
+                    : 'RESEND OTP ON WHATSAPP',
                 style: AppText.body.copyWith(
-                  color: _secondsLeft == 0
+                  color: _waSecondsLeft == 0
                       ? AppColors.primary
-                      : Colors.white38,
+                      : AppColors.placeholder,
                   letterSpacing: 1.2,
                 ),
               ),
@@ -304,7 +320,7 @@ class _StoreStep3OtpScreenState extends State<StoreStep3OtpScreen> {
         color: AppColors.card,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: filled ? AppColors.primary : Colors.white12,
+          color: filled ? AppColors.primary : AppColors.subtle,
           width: 1.6,
         ),
       ),
@@ -312,7 +328,7 @@ class _StoreStep3OtpScreenState extends State<StoreStep3OtpScreen> {
         filled ? _otp[index] : '•',
         style: AppText.titleL.copyWith(
           fontSize: 26,
-          color: filled ? AppColors.primary : Colors.white38,
+          color: filled ? AppColors.primary : AppColors.placeholder,
         ),
       ),
     );
@@ -358,7 +374,7 @@ class _StoreStep3OtpScreenState extends State<StoreStep3OtpScreen> {
                   ? _verifyAndContinue
                   : null,
               child: isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
+                  ? const CircularProgressIndicator(color: AppColors.onPrimary)
                   : Text('VERIFY OTP'),
             ),
           ),
@@ -383,7 +399,7 @@ class _StoreStep3OtpScreenState extends State<StoreStep3OtpScreen> {
             style: AppText.titleL.copyWith(
               fontSize: isNumber ? 32 : 20,
               color: label == 'Clear'
-                  ? Colors.white70
+                  ? AppColors.inactive
                   : AppColors.primary,
             ),
           ),

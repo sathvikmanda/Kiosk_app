@@ -35,6 +35,7 @@ class SendSummaryScreen extends StatefulWidget {
 class _SendSummaryScreenState extends State<SendSummaryScreen> {
   late Razorpay _razorpay;
   bool paying = false;
+  bool _paymentLaunched = false;
 
   int get totalCost => widget.deliveryCost + widget.lockerCost;
 
@@ -56,6 +57,8 @@ class _SendSummaryScreenState extends State<SendSummaryScreen> {
   // PAY FLOW
   // ===============================
 Future<void> _payAndContinue() async {
+  if (_paymentLaunched) return;
+  _paymentLaunched = true;
   setState(() => paying = true);
 
   // 🔥 Convert rupees to paise
@@ -119,6 +122,7 @@ Future<void> _payAndContinue() async {
   // ===============================
   void _onError(PaymentFailureResponse res) {
     InactivityController().resumeAfterPayment();
+    _paymentLaunched = false;
     setState(() => paying = false);
     _showError('Payment failed');
   }
@@ -147,14 +151,14 @@ Future<void> _payAndContinue() async {
                 OutlinedButton(
                   onPressed: () => Navigator.pop(context),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(
-                      color: Colors.white,
+                    side: BorderSide(
+                      color: AppColors.onSurface,
                       width: 1.5,
                     ),
                   ),
                   child: Text(
                     'BACK',
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: AppColors.onSurface),
                   ),
                 ),
               ],
@@ -182,7 +186,7 @@ Future<void> _payAndContinue() async {
               width: double.infinity,
               height: 68,
               child: ElevatedButton(
-                onPressed: paying ? null : _payAndContinue,
+                onPressed: (paying || _paymentLaunched) ? null : _payAndContinue,
                 child: paying
                     ? const CircularProgressIndicator(color: Colors.black)
                     : Text('PAY & CONTINUE'),

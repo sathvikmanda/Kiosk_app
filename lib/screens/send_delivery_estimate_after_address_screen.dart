@@ -168,11 +168,11 @@ class _SendDeliveryEstimateAfterAddressScreenState
         Navigator.pop(context); // ✅ BACK TO ADDRESS DASHBOARD
       },
       style: OutlinedButton.styleFrom(
-        side: const BorderSide(color: Colors.white, width: 1.5),
+        side: BorderSide(color: AppColors.onSurface, width: 1.5),
       ),
       child: Text(
         'BACK',
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(color: AppColors.onSurface),
       ),
     ),
   ],
@@ -181,7 +181,7 @@ class _SendDeliveryEstimateAfterAddressScreenState
             const SizedBox(height: 6),
             Text(
               'Prices shown are estimates. Final price will be confirmed.',
-              style: AppText.body.copyWith(color: Colors.white70),
+              style: AppText.body.copyWith(color: AppColors.inactive),
             ),
             const SizedBox(height: 24),
 
@@ -268,7 +268,7 @@ class _SendDeliveryEstimateAfterAddressScreenState
               : AppColors.card,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: selected ? AppColors.primary : Colors.white12,
+            color: selected ? AppColors.primary : AppColors.subtle,
             width: 2,
           ),
         ),
@@ -306,7 +306,7 @@ class _SendDeliveryEstimateAfterAddressScreenState
                     : AppColors.card,
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: selected ? AppColors.primary : Colors.white12,
+                  color: selected ? AppColors.primary : AppColors.subtle,
                   width: 2,
                 ),
               ),

@@ -8,6 +8,14 @@ import '../services/api_service.dart';
 
 import 'kiosk_home_screen.dart';
 
+// Mask middle digits of access code for privacy: 123456 → 12xxx56
+String _maskCode(String code) {
+  if (code.length < 6) return code;
+  final start = code.substring(0, code.length - 5);
+  final end = code.substring(code.length - 2);
+  return '${start}xxx$end';
+}
+
 class StoreStep6AccessCodeScreen extends StatefulWidget {
   const StoreStep6AccessCodeScreen({
     super.key,
@@ -102,7 +110,7 @@ class _StoreStep6AccessCodeScreenState
                     ),
                   ),
                   child: Text(
-                    widget.accessCode,
+                    _maskCode(widget.accessCode),
                     style: AppText.code,
                   ),
                 ),
