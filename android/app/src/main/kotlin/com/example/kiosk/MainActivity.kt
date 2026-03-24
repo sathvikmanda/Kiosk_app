@@ -23,16 +23,27 @@ class MainActivity : FlutterActivity() {
     }
 
     override fun onBackPressed() {
+        if (kioskEnabled) return
+        super.onBackPressed()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Re-enable kiosk when returning from another app (e.g. Termux)
         if (kioskEnabled) {
-            // block back button in kiosk mode
-        } else {
-            super.onBackPressed()
+            hideSystemUI()
+            val dpm = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+            val componentName = ComponentName(this, MyDeviceAdminReceiver::class.java)
+            if (dpm.isDeviceOwnerApp(packageName)) {
+                try { startLockTask() } catch (e: Exception) {
+                    android.util.Log.d("KIOSK", "startLockTask on resume: ${e.message}")
+                }
+            }
         }
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        // Only hide system UI when kiosk is active
         if (hasFocus && kioskEnabled) hideSystemUI()
     }
 
@@ -43,11 +54,11 @@ class MainActivity : FlutterActivity() {
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "enableKiosk" -> {
-                        startKiosk()
+                        runOnUiThread { startKiosk() }
                         result.success(null)
                     }
                     "disableKiosk" -> {
-                        stopKiosk()
+                        runOnUiThread { stopKiosk() }
                         result.success(null)
                     }
                     "launchApp" -> {
@@ -74,10 +85,15 @@ class MainActivity : FlutterActivity() {
         val dpm = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
         val componentName = ComponentName(this, MyDeviceAdminReceiver::class.java)
 
+        android.util.Log.d("KIOSK", "isDeviceOwner: ${dpm.isDeviceOwnerApp(packageName)}")
+
         if (dpm.isDeviceOwnerApp(packageName)) {
             dpm.setLockTaskPackages(componentName, arrayOf(packageName, "com.termux"))
             dpm.setLockTaskFeatures(componentName, DevicePolicyManager.LOCK_TASK_FEATURE_NONE)
             startLockTask()
+            android.util.Log.d("KIOSK", "Lock task started")
+        } else {
+            android.util.Log.d("KIOSK", "NOT device owner — kiosk mode skipped")
         }
         hideSystemUI()
     }
@@ -97,7 +113,7 @@ class MainActivity : FlutterActivity() {
             )
         }
         stopLockTask()
-        showSystemUI() // restore nav bar and status bar
+        showSystemUI()
     }
 
     private fun hideSystemUI() {

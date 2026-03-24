@@ -34,7 +34,7 @@ class _DropStep4PaymentScreenState
 
   // ================= DISPLAY CALC =================
   int get prepaid => widget.hours * widget.ratePerHour;
-  int get subtotal => prepaid + widget.dropCharge;
+  int get subtotal => prepaid ;
   double get gst => subtotal * 0.18;
   int get total => (subtotal).round();
 

@@ -1,9 +1,27 @@
 import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
 import '../core/app_text.dart';
+import '../core/inactivity_controller.dart';
 
-class LockerOpenGuardOverlay extends StatelessWidget {
+class LockerOpenGuardOverlay extends StatefulWidget {
   const LockerOpenGuardOverlay({super.key});
+
+  @override
+  State<LockerOpenGuardOverlay> createState() => _LockerOpenGuardOverlayState();
+}
+
+class _LockerOpenGuardOverlayState extends State<LockerOpenGuardOverlay> {
+  @override
+  void initState() {
+    super.initState();
+    InactivityController().pauseForPayment();
+  }
+
+  @override
+  void dispose() {
+    InactivityController().resumeAfterPayment();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +41,7 @@ class LockerOpenGuardOverlay extends StatelessWidget {
               Text(
                 'LOCKER OPEN',
                 style: AppText.titleXL.copyWith(
-                  color: AppColors.onSurface,
+                  color: Colors.white,
                   letterSpacing: 2,
                 ),
               ),
@@ -31,7 +49,7 @@ class LockerOpenGuardOverlay extends StatelessWidget {
               Text(
                 'Please close the locker to continue',
                 style: AppText.muted.copyWith(
-                  color: AppColors.inactive,
+                  color: Colors.white70,
                   fontSize: 26,
                 ),
               ),

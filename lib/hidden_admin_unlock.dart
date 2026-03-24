@@ -30,7 +30,7 @@ class _HiddenAdminUnlockState extends State<HiddenAdminUnlock> {
   void _showAdminDialog() {
     showDialog(
       context: context,
-      builder: (_) => const _AdminPinDialog(),
+      builder: (_) => const AdminPinDialog(),
     );
   }
 
@@ -41,7 +41,7 @@ class _HiddenAdminUnlockState extends State<HiddenAdminUnlock> {
         widget.child,
         Positioned(
           top: 0,
-          right: 0,
+          left: 0,
           width: 120,
           height: 120,
           child: GestureDetector(
@@ -55,14 +55,14 @@ class _HiddenAdminUnlockState extends State<HiddenAdminUnlock> {
   }
 }
 
-class _AdminPinDialog extends StatefulWidget {
-  const _AdminPinDialog();
+class AdminPinDialog extends StatefulWidget {
+  const AdminPinDialog();
 
   @override
-  State<_AdminPinDialog> createState() => _AdminPinDialogState();
+  State<AdminPinDialog> createState() => AdminPinDialogState();
 }
 
-class _AdminPinDialogState extends State<_AdminPinDialog> {
+class AdminPinDialogState extends State<AdminPinDialog> {
   final TextEditingController _pinController = TextEditingController();
   final String adminPin = "5259";
   bool _unlocked = false;
