@@ -52,6 +52,7 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
 
   final LockerStateService _lockerState = LockerStateService();
   bool _showInactivityWarning = false;
+  bool _serverDownShowing = false;
 
   @override
   void initState() {
@@ -78,16 +79,20 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
       setState(() => _showInactivityWarning = false);
     };
 
-    // onSoftReset is NOT set here — owned by InactivityRouteObserver
-    // which sets it to _resetToHome when user navigates into a child screen
-
     inactivity.userInteracted();
     KioskController.enable();
     _lockerState.start();
 
-    // Set to true to enable server down screen, false to disable
-    const bool serverCheckEnabled = true;
-    if (serverCheckEnabled) _checkServerHealth();
+    // Listen to server reachability — show server down screen when backend is off
+    _lockerState.serverStream.listen((reachable) {
+      if (!mounted) return;
+      if (!reachable && !_serverDownShowing) {
+        _serverDownShowing = true;
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const ServerDownScreen()),
+        ).then((_) => _serverDownShowing = false);
+      }
+    });
   }
 
   Future<void> _checkServerHealth() async {
@@ -95,9 +100,12 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
       await ApiService.getAllLocked().timeout(const Duration(seconds: 5));
     } catch (_) {
       if (!mounted) return;
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const ServerDownScreen()),
-      );
+      if (!_serverDownShowing) {
+        _serverDownShowing = true;
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const ServerDownScreen()),
+        ).then((_) => _serverDownShowing = false);
+      }
     }
   }
 
@@ -529,8 +537,34 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
             Expanded(
               child: Column(
                 children: [
+                   Expanded(
+                    child: _actionButton(
+                      icon: Icons.archive_outlined,
+                      title: 'Store',
+                      subtitle: 'Keep items temporarily',
+                      onTap: () async {
+                        if (_recordingStartInProgress) return;
+                        _recordingStartInProgress = true;
+                        try {
+                          ApiService.trackLockerClick(service: 'store');
+                          final helpId = await ApiService.startComplaintIfNeeded();
+                          if (helpId == null) return;
+                          InactivityController().activeHelpId = helpId;
+                          if (!mounted) return;
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => StoreStep1Screen(helpId: helpId),
+                            ),
+                          );
+                        } finally {
+                          if (mounted) setState(() => _recordingStartInProgress = false);
+                        }
+                      },
+                    ),
+                  ),
                   
-                 
+                  const SizedBox(height: 24),
                   Expanded(
                     child: _actionButton(
                       icon: Icons.move_to_inbox_outlined,
@@ -561,33 +595,6 @@ class _KioskHomeScreenState extends State<KioskHomeScreen>
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Expanded(
-                    child: _actionButton(
-                      icon: Icons.archive_outlined,
-                      title: 'Store',
-                      subtitle: 'Keep items temporarily',
-                      onTap: () async {
-                        if (_recordingStartInProgress) return;
-                        _recordingStartInProgress = true;
-                        try {
-                          ApiService.trackLockerClick(service: 'store');
-                          final helpId = await ApiService.startComplaintIfNeeded();
-                          if (helpId == null) return;
-                          InactivityController().activeHelpId = helpId;
-                          if (!mounted) return;
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => StoreStep1Screen(helpId: helpId),
-                            ),
-                          );
-                        } finally {
-                          if (mounted) setState(() => _recordingStartInProgress = false);
-                        }
-                      },
-                    ),
-                  ),
-                   const SizedBox(height: 24),
                   Expanded(
                     child: _actionButton(
                       icon: Icons.local_shipping_rounded,
