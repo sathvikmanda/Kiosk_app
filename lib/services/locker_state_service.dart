@@ -48,7 +48,7 @@ class LockerStateService {
           if (backendLocked) {
             _lockedConfirmations++;
             _unlockedConfirmations = 0;
-            // 2 confirmations = 4 seconds to confirm closed
+            // 2 confirmations × 2s = 4 seconds to confirm closed
             if (_lockedConfirmations >= 2 && _allLocked != true) {
               _allLocked = true;
               _allLockedController.add(true);
@@ -60,8 +60,8 @@ class LockerStateService {
           } else {
             _unlockedConfirmations++;
             _lockedConfirmations = 0;
-            // 1 confirmation = 2 seconds to show locker open immediately
-            if (_unlockedConfirmations >= 5 && _allLocked != false) {
+            // 2 confirmations × 2s = 4 seconds to show locker open
+            if (_unlockedConfirmations >= 2 && _allLocked != false) {
               _allLocked = false;
               _allLockedController.add(false);
               if (!_isPlayingAudio) {
